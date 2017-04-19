@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.mp3dir_dialog = new System.Windows.Forms.FolderBrowserDialog();
             this.mp3dir_button = new System.Windows.Forms.Button();
             this.mp3_path = new System.Windows.Forms.TextBox();
@@ -45,6 +46,10 @@
             this.label4 = new System.Windows.Forms.Label();
             this.conv_count = new System.Windows.Forms.Label();
             this.button1 = new System.Windows.Forms.Button();
+            this.progressBarBindingSource = new System.Windows.Forms.BindingSource(this.components);
+            this.label5 = new System.Windows.Forms.Label();
+            this.user_max_async = new System.Windows.Forms.TextBox();
+            ((System.ComponentModel.ISupportInitialize)(this.progressBarBindingSource)).BeginInit();
             this.SuspendLayout();
             // 
             // mp3dir_dialog
@@ -148,6 +153,7 @@
             this.progressBar.Name = "progressBar";
             this.progressBar.Size = new System.Drawing.Size(837, 13);
             this.progressBar.TabIndex = 8;
+            this.progressBar.Tag = "";
             // 
             // all_count
             // 
@@ -186,12 +192,34 @@
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
+            // progressBarBindingSource
+            // 
+            this.progressBarBindingSource.DataSource = typeof(System.Windows.Forms.ProgressBar);
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(12, 87);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(78, 13);
+            this.label5.TabIndex = 13;
+            this.label5.Text = "Max processes";
+            // 
+            // user_max_async
+            // 
+            this.user_max_async.Location = new System.Drawing.Point(141, 80);
+            this.user_max_async.Name = "user_max_async";
+            this.user_max_async.Size = new System.Drawing.Size(100, 20);
+            this.user_max_async.TabIndex = 14;
+            // 
             // MultiTraConv
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoScroll = true;
             this.ClientSize = new System.Drawing.Size(970, 509);
+            this.Controls.Add(this.user_max_async);
+            this.Controls.Add(this.label5);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.conv_count);
             this.Controls.Add(this.label4);
@@ -209,6 +237,7 @@
             this.Name = "MultiTraConv";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "MultiTraConv";
+            ((System.ComponentModel.ISupportInitialize)(this.progressBarBindingSource)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -233,6 +262,9 @@
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label conv_count;
         private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.BindingSource progressBarBindingSource;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.TextBox user_max_async;
     }
 }
 
