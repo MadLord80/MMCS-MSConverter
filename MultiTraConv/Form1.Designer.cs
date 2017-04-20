@@ -28,7 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
             this.mp3dir_dialog = new System.Windows.Forms.FolderBrowserDialog();
             this.mp3dir_button = new System.Windows.Forms.Button();
             this.mp3_path = new System.Windows.Forms.TextBox();
@@ -45,16 +44,16 @@
             this.all_count = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.conv_count = new System.Windows.Forms.Label();
-            this.button1 = new System.Windows.Forms.Button();
-            this.progressBarBindingSource = new System.Windows.Forms.BindingSource(this.components);
+            this.start_convert = new System.Windows.Forms.Button();
             this.label5 = new System.Windows.Forms.Label();
             this.user_max_async = new System.Windows.Forms.TextBox();
-            ((System.ComponentModel.ISupportInitialize)(this.progressBarBindingSource)).BeginInit();
+            this.stop_convert = new System.Windows.Forms.Button();
+            this.button1 = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // mp3dir_dialog
             // 
-            this.mp3dir_dialog.RootFolder = System.Environment.SpecialFolder.MyComputer;
+            this.mp3dir_dialog.RootFolder = System.Environment.SpecialFolder.UserProfile;
             this.mp3dir_dialog.ShowNewFolderButton = false;
             // 
             // mp3dir_button
@@ -113,7 +112,7 @@
             // 
             // omadir_dialog
             // 
-            this.omadir_dialog.RootFolder = System.Environment.SpecialFolder.MyComputer;
+            this.omadir_dialog.RootFolder = System.Environment.SpecialFolder.UserProfile;
             // 
             // FilesTable
             // 
@@ -182,19 +181,15 @@
             this.conv_count.TabIndex = 11;
             this.conv_count.Text = "0";
             // 
-            // button1
+            // start_convert
             // 
-            this.button1.Location = new System.Drawing.Point(833, 77);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(117, 32);
-            this.button1.TabIndex = 12;
-            this.button1.Text = "Convert";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
-            // 
-            // progressBarBindingSource
-            // 
-            this.progressBarBindingSource.DataSource = typeof(System.Windows.Forms.ProgressBar);
+            this.start_convert.Location = new System.Drawing.Point(709, 75);
+            this.start_convert.Name = "start_convert";
+            this.start_convert.Size = new System.Drawing.Size(117, 32);
+            this.start_convert.TabIndex = 12;
+            this.start_convert.Text = "Convert";
+            this.start_convert.UseVisualStyleBackColor = true;
+            this.start_convert.Click += new System.EventHandler(this.button1_Click);
             // 
             // label5
             // 
@@ -212,15 +207,40 @@
             this.user_max_async.Size = new System.Drawing.Size(100, 20);
             this.user_max_async.TabIndex = 14;
             // 
+            // stop_convert
+            // 
+            this.stop_convert.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(128)))), ((int)(((byte)(0)))));
+            this.stop_convert.Enabled = false;
+            this.stop_convert.FlatAppearance.BorderColor = System.Drawing.Color.Red;
+            this.stop_convert.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.stop_convert.Location = new System.Drawing.Point(832, 75);
+            this.stop_convert.Name = "stop_convert";
+            this.stop_convert.Size = new System.Drawing.Size(46, 32);
+            this.stop_convert.TabIndex = 15;
+            this.stop_convert.Text = "Stop";
+            this.stop_convert.UseVisualStyleBackColor = false;
+            this.stop_convert.Click += new System.EventHandler(this.stop_convert_Click);
+            // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(896, 75);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(54, 32);
+            this.button1.TabIndex = 16;
+            this.button1.Text = "Settings";
+            this.button1.UseVisualStyleBackColor = true;
+            // 
             // MultiTraConv
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoScroll = true;
             this.ClientSize = new System.Drawing.Size(970, 509);
+            this.Controls.Add(this.button1);
+            this.Controls.Add(this.stop_convert);
             this.Controls.Add(this.user_max_async);
             this.Controls.Add(this.label5);
-            this.Controls.Add(this.button1);
+            this.Controls.Add(this.start_convert);
             this.Controls.Add(this.conv_count);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.all_count);
@@ -237,7 +257,6 @@
             this.Name = "MultiTraConv";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "MultiTraConv";
-            ((System.ComponentModel.ISupportInitialize)(this.progressBarBindingSource)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -261,10 +280,11 @@
         private System.Windows.Forms.Label all_count;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label conv_count;
-        private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.BindingSource progressBarBindingSource;
+        private System.Windows.Forms.Button start_convert;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.TextBox user_max_async;
+        private System.Windows.Forms.Button stop_convert;
+        private System.Windows.Forms.Button button1;
     }
 }
 

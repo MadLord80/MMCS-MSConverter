@@ -11,7 +11,8 @@ namespace MultiTraConv
     {
         private Int32 _start_form_height = 547;
         private Int32 _start_table_height = 363;
-        private int max_async = 10;
+        private int max_async = 1;
+        private bool to_stop = false;
 
         public MultiTraConv()
         {
@@ -40,8 +41,8 @@ namespace MultiTraConv
         {
             if (this.mp3dir_dialog.ShowDialog() == DialogResult.OK)
             {
-//string temp_dir = "D:\\temp\\Мои документы\\Музыка с дисков";
-//this.mp3dir_dialog.SelectedPath = temp_dir;
+string temp_dir = "D:\\temp\\Мои документы\\Музыка с дисков";
+this.mp3dir_dialog.SelectedPath = temp_dir;
 
                 var mp3_dir = new DirectoryInfo(this.mp3dir_dialog.SelectedPath);
                 FileInfo[] mp3_files = mp3_dir.GetFiles("*.mp3", SearchOption.AllDirectories);
@@ -63,8 +64,8 @@ namespace MultiTraConv
         {
             if (this.omadir_dialog.ShowDialog() == DialogResult.OK)
             {
-//string temp_dir = "D:\\tmp";
-//this.omadir_dialog.SelectedPath = temp_dir;
+string temp_dir = "D:\\tmp";
+this.omadir_dialog.SelectedPath = temp_dir;
 
                 var oma_dir = new DirectoryInfo(this.omadir_dialog.SelectedPath);
                 if (oma_dir.GetFiles("*").Length > 0)
@@ -96,7 +97,8 @@ namespace MultiTraConv
                 this.progressBar.Value = 0;
                 max_async = Convert.ToInt32(this.user_max_async.Text);
 
-                this.button1.Enabled = false;
+                this.start_convert.Enabled = false;
+                this.stop_convert.Enabled = true;
                 
                 convert();
                 //MessageBox.Show("DONE!");
@@ -107,7 +109,6 @@ namespace MultiTraConv
         {
             int cur_max_async = max_async;
 
-            Process traconv = new Process();
             var app_dir = Path.GetDirectoryName(Application.ExecutablePath);
             ProcessStartInfo startInfo = new ProcessStartInfo(app_dir + "\\TraConv.exe");
             startInfo.CreateNoWindow = true;
@@ -116,6 +117,11 @@ namespace MultiTraConv
             
             foreach (ListViewItem row in this.FilesTable.Items)
             {
+                if (to_stop)
+                {
+                    to_stop = false;
+                    break;
+                }
                 string filename = row.Text;
                 string add_path = filename.Remove(0, mp3_path.TextLength);
                 add_path = add_path.Remove(add_path.Length - 3, 3) + "oma";
@@ -128,16 +134,17 @@ namespace MultiTraConv
                     continue;
                 }
                 string new_path_quoted = '"' + new_path + '"';
-                row.SubItems[1].Text = "converting...";
                 startInfo.Arguments = '"' + filename + '"' + " --Convert --FileType OMA --BitRate 352000 --Output " + new_path_quoted;
 
-                traconv.StartInfo = startInfo;
                 while (max_async == 0)
                 {
                     await Task.Delay(2000);
                 }
-                traconv.Start();
+                row.SubItems[1].Text = "converting...";
                 max_async--;
+                Process traconv = new Process();
+                traconv.StartInfo = startInfo;
+                traconv.Start();
                 get_result(traconv, row, new_path);
             }
             while (max_async < cur_max_async)
@@ -145,7 +152,8 @@ namespace MultiTraConv
                 await Task.Delay(2000);
             }
             Application.DoEvents();
-            this.button1.Enabled = true;
+            this.start_convert.Enabled = true;
+            this.stop_convert.Enabled = false;
         }
 
         private async void get_result (Process proc, ListViewItem item, string new_path)
@@ -161,6 +169,11 @@ namespace MultiTraConv
                 this.conv_count.Text = this.progressBar.Value.ToString();
             }
             max_async++;
+        }
+
+        private void stop_convert_Click(object sender, EventArgs e)
+        {
+            to_stop = true;
         }
     }
 }
