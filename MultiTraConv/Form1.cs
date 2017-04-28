@@ -2,6 +2,7 @@
 using System.Drawing;
 using System.Windows.Forms;
 using System.IO;
+using System.Text;
 using System.Diagnostics;
 using System.Threading.Tasks;
 
@@ -11,18 +12,24 @@ namespace MultiTraConv
     {
         private Int32 _start_form_height = 547;
         private Int32 _start_table_height = 363;
-        private int max_async = 1;
         private bool to_stop = false;
+        private FileStream log;
+
+        //Settings
+        public int max_async = 1;
+        public int max_bitrate = 128;
+        public bool debug = false;
+        public string log_file = "log.txt";
 
         public MultiTraConv()
         {
             InitializeComponent();
+
             this.MaximumSize = new Size(986,800);
             this.SizeChanged += new EventHandler(this.MultiTraConv_SizeChanged);
             this.progressBar.Minimum = 0;
             this.progressBar.Value = 0;
             this.progressBar.Step = 1;
-            this.user_max_async.Text = max_async.ToString();
         }
 
         private void MultiTraConv_SizeChanged(Object sender, EventArgs e)
@@ -41,8 +48,8 @@ namespace MultiTraConv
         {
             if (this.mp3dir_dialog.ShowDialog() == DialogResult.OK)
             {
-string temp_dir = "D:\\temp\\Мои документы\\Музыка с дисков";
-this.mp3dir_dialog.SelectedPath = temp_dir;
+//string temp_dir = "D:\\temp\\Мои документы\\Музыка с дисков";
+//this.mp3dir_dialog.SelectedPath = temp_dir;
 
                 var mp3_dir = new DirectoryInfo(this.mp3dir_dialog.SelectedPath);
                 FileInfo[] mp3_files = mp3_dir.GetFiles("*.mp3", SearchOption.AllDirectories);
@@ -64,8 +71,8 @@ this.mp3dir_dialog.SelectedPath = temp_dir;
         {
             if (this.omadir_dialog.ShowDialog() == DialogResult.OK)
             {
-string temp_dir = "D:\\tmp";
-this.omadir_dialog.SelectedPath = temp_dir;
+//string temp_dir = "D:\\tmp";
+//this.omadir_dialog.SelectedPath = temp_dir;
 
                 var oma_dir = new DirectoryInfo(this.omadir_dialog.SelectedPath);
                 if (oma_dir.GetFiles("*").Length > 0)
@@ -95,13 +102,17 @@ this.omadir_dialog.SelectedPath = temp_dir;
                     row.SubItems[1].Text = "ready";
                 }
                 this.progressBar.Value = 0;
-                max_async = Convert.ToInt32(this.user_max_async.Text);
 
                 this.start_convert.Enabled = false;
+                this.button_Settings.Enabled = false;
                 this.stop_convert.Enabled = true;
-                
+
+                if (debug)
+                {
+                    log = new FileStream(Path.GetDirectoryName(Application.ExecutablePath) + "\\" + log_file, FileMode.Create, FileAccess.Write);
+                }
+
                 convert();
-                //MessageBox.Show("DONE!");
             }
         }
 
@@ -134,11 +145,16 @@ this.omadir_dialog.SelectedPath = temp_dir;
                     continue;
                 }
                 string new_path_quoted = '"' + new_path + '"';
-                startInfo.Arguments = '"' + filename + '"' + " --Convert --FileType OMA --BitRate 352000 --Output " + new_path_quoted;
+                startInfo.Arguments = '"' + filename + '"' + " --Convert --FileType OMAP --BitRate " + max_bitrate * 1000 + " --Output " + new_path_quoted;
 
                 while (max_async == 0)
                 {
                     await Task.Delay(2000);
+                }
+                if (to_stop)
+                {
+                    to_stop = false;
+                    break;
                 }
                 row.SubItems[1].Text = "converting...";
                 max_async--;
@@ -153,7 +169,13 @@ this.omadir_dialog.SelectedPath = temp_dir;
             }
             Application.DoEvents();
             this.start_convert.Enabled = true;
+            this.button_Settings.Enabled = true;
             this.stop_convert.Enabled = false;
+
+            if (debug)
+            {
+                log.Close();
+            }
         }
 
         private async void get_result (Process proc, ListViewItem item, string new_path)
@@ -168,12 +190,23 @@ this.omadir_dialog.SelectedPath = temp_dir;
                 this.progressBar.PerformStep();
                 this.conv_count.Text = this.progressBar.Value.ToString();
             }
+            if (debug)
+            {
+                byte[] out_text = Encoding.GetEncoding(1251).GetBytes(p_out);
+                log.Write(out_text, 0, out_text.Length);
+            }
             max_async++;
         }
 
         private void stop_convert_Click(object sender, EventArgs e)
         {
             to_stop = true;
+        }
+
+        private void button_Settings_Click(object sender, EventArgs e)
+        {
+            SettingsPage sp = new SettingsPage(this);
+            sp.Show();
         }
     }
 }

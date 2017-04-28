@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MultiTraConv));
             this.mp3dir_dialog = new System.Windows.Forms.FolderBrowserDialog();
             this.mp3dir_button = new System.Windows.Forms.Button();
             this.mp3_path = new System.Windows.Forms.TextBox();
@@ -45,15 +46,13 @@
             this.label4 = new System.Windows.Forms.Label();
             this.conv_count = new System.Windows.Forms.Label();
             this.start_convert = new System.Windows.Forms.Button();
-            this.label5 = new System.Windows.Forms.Label();
-            this.user_max_async = new System.Windows.Forms.TextBox();
             this.stop_convert = new System.Windows.Forms.Button();
-            this.button1 = new System.Windows.Forms.Button();
+            this.button_Settings = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // mp3dir_dialog
             // 
-            this.mp3dir_dialog.RootFolder = System.Environment.SpecialFolder.UserProfile;
+            this.mp3dir_dialog.RootFolder = System.Environment.SpecialFolder.MyComputer;
             this.mp3dir_dialog.ShowNewFolderButton = false;
             // 
             // mp3dir_button
@@ -112,7 +111,7 @@
             // 
             // omadir_dialog
             // 
-            this.omadir_dialog.RootFolder = System.Environment.SpecialFolder.UserProfile;
+            this.omadir_dialog.RootFolder = System.Environment.SpecialFolder.MyComputer;
             // 
             // FilesTable
             // 
@@ -183,7 +182,7 @@
             // 
             // start_convert
             // 
-            this.start_convert.Location = new System.Drawing.Point(709, 75);
+            this.start_convert.Location = new System.Drawing.Point(781, 75);
             this.start_convert.Name = "start_convert";
             this.start_convert.Size = new System.Drawing.Size(117, 32);
             this.start_convert.TabIndex = 12;
@@ -191,29 +190,13 @@
             this.start_convert.UseVisualStyleBackColor = true;
             this.start_convert.Click += new System.EventHandler(this.button1_Click);
             // 
-            // label5
-            // 
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(12, 87);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(78, 13);
-            this.label5.TabIndex = 13;
-            this.label5.Text = "Max processes";
-            // 
-            // user_max_async
-            // 
-            this.user_max_async.Location = new System.Drawing.Point(141, 80);
-            this.user_max_async.Name = "user_max_async";
-            this.user_max_async.Size = new System.Drawing.Size(100, 20);
-            this.user_max_async.TabIndex = 14;
-            // 
             // stop_convert
             // 
-            this.stop_convert.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(128)))), ((int)(((byte)(0)))));
+            this.stop_convert.BackColor = System.Drawing.SystemColors.AppWorkspace;
             this.stop_convert.Enabled = false;
             this.stop_convert.FlatAppearance.BorderColor = System.Drawing.Color.Red;
             this.stop_convert.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-            this.stop_convert.Location = new System.Drawing.Point(832, 75);
+            this.stop_convert.Location = new System.Drawing.Point(904, 75);
             this.stop_convert.Name = "stop_convert";
             this.stop_convert.Size = new System.Drawing.Size(46, 32);
             this.stop_convert.TabIndex = 15;
@@ -221,14 +204,15 @@
             this.stop_convert.UseVisualStyleBackColor = false;
             this.stop_convert.Click += new System.EventHandler(this.stop_convert_Click);
             // 
-            // button1
+            // button_Settings
             // 
-            this.button1.Location = new System.Drawing.Point(896, 75);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(54, 32);
-            this.button1.TabIndex = 16;
-            this.button1.Text = "Settings";
-            this.button1.UseVisualStyleBackColor = true;
+            this.button_Settings.Location = new System.Drawing.Point(15, 75);
+            this.button_Settings.Name = "button_Settings";
+            this.button_Settings.Size = new System.Drawing.Size(54, 32);
+            this.button_Settings.TabIndex = 16;
+            this.button_Settings.Text = "Settings";
+            this.button_Settings.UseVisualStyleBackColor = true;
+            this.button_Settings.Click += new System.EventHandler(this.button_Settings_Click);
             // 
             // MultiTraConv
             // 
@@ -236,10 +220,8 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoScroll = true;
             this.ClientSize = new System.Drawing.Size(970, 509);
-            this.Controls.Add(this.button1);
+            this.Controls.Add(this.button_Settings);
             this.Controls.Add(this.stop_convert);
-            this.Controls.Add(this.user_max_async);
-            this.Controls.Add(this.label5);
             this.Controls.Add(this.start_convert);
             this.Controls.Add(this.conv_count);
             this.Controls.Add(this.label4);
@@ -253,6 +235,7 @@
             this.Controls.Add(this.label1);
             this.Controls.Add(this.mp3_path);
             this.Controls.Add(this.mp3dir_button);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MinimumSize = new System.Drawing.Size(986, 547);
             this.Name = "MultiTraConv";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
@@ -281,10 +264,8 @@
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label conv_count;
         private System.Windows.Forms.Button start_convert;
-        private System.Windows.Forms.Label label5;
-        private System.Windows.Forms.TextBox user_max_async;
         private System.Windows.Forms.Button stop_convert;
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button button_Settings;
     }
 }
 
