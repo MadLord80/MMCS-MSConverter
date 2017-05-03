@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // Управление общими сведениями о сборке осуществляется с помощью 
 // набора атрибутов. Измените значения этих атрибутов, чтобы изменить сведения,
 // связанные со сборкой.
-[assembly: AssemblyTitle("MultiTraConv")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("MMCS MultiTraConv")]
+[assembly: AssemblyDescription("MMCS music converter")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("MadLord (madlord.info)")]
-[assembly: AssemblyProduct("MultiTraConv")]
-[assembly: AssemblyCopyright("")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("")]
+[assembly: AssemblyCopyright("MadLord (madlord.info)")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

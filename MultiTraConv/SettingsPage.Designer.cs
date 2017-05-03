@@ -37,13 +37,15 @@
             this.is_debug = new System.Windows.Forms.CheckBox();
             this.label2 = new System.Windows.Forms.Label();
             this.log_file = new System.Windows.Forms.TextBox();
+            this.to_sc = new System.Windows.Forms.CheckBox();
+            this.NNNrename = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.user_max_async)).BeginInit();
             this.SuspendLayout();
             // 
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(12, 42);
+            this.label5.Location = new System.Drawing.Point(12, 24);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(78, 13);
             this.label5.TabIndex = 14;
@@ -52,15 +54,15 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(12, 71);
+            this.label1.Location = new System.Drawing.Point(12, 51);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(59, 13);
+            this.label1.Size = new System.Drawing.Size(90, 13);
             this.label1.TabIndex = 16;
-            this.label1.Text = "Max bitrate";
+            this.label1.Text = "Max bitrate (kb/s)";
             // 
             // user_max_async
             // 
-            this.user_max_async.Location = new System.Drawing.Point(96, 40);
+            this.user_max_async.Location = new System.Drawing.Point(109, 22);
             this.user_max_async.Name = "user_max_async";
             this.user_max_async.Size = new System.Drawing.Size(120, 20);
             this.user_max_async.TabIndex = 17;
@@ -68,6 +70,7 @@
             // 
             // user_max_bitrate
             // 
+            this.user_max_bitrate.Enabled = false;
             this.user_max_bitrate.FormattingEnabled = true;
             this.user_max_bitrate.Items.AddRange(new object[] {
             "64",
@@ -77,7 +80,7 @@
             "256",
             "320",
             "352"});
-            this.user_max_bitrate.Location = new System.Drawing.Point(95, 68);
+            this.user_max_bitrate.Location = new System.Drawing.Point(109, 48);
             this.user_max_bitrate.Name = "user_max_bitrate";
             this.user_max_bitrate.Size = new System.Drawing.Size(121, 21);
             this.user_max_bitrate.TabIndex = 18;
@@ -85,7 +88,7 @@
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(141, 190);
+            this.button1.Location = new System.Drawing.Point(141, 232);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(75, 23);
             this.button1.TabIndex = 19;
@@ -96,7 +99,7 @@
             // is_debug
             // 
             this.is_debug.AutoSize = true;
-            this.is_debug.Location = new System.Drawing.Point(15, 112);
+            this.is_debug.Location = new System.Drawing.Point(15, 154);
             this.is_debug.Name = "is_debug";
             this.is_debug.Size = new System.Drawing.Size(76, 17);
             this.is_debug.TabIndex = 21;
@@ -107,7 +110,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(12, 143);
+            this.label2.Location = new System.Drawing.Point(12, 185);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(70, 13);
             this.label2.TabIndex = 22;
@@ -115,17 +118,41 @@
             // 
             // log_file
             // 
-            this.log_file.Location = new System.Drawing.Point(95, 140);
+            this.log_file.Location = new System.Drawing.Point(108, 182);
             this.log_file.Name = "log_file";
             this.log_file.ReadOnly = true;
             this.log_file.Size = new System.Drawing.Size(121, 20);
             this.log_file.TabIndex = 23;
             // 
+            // to_sc
+            // 
+            this.to_sc.AutoSize = true;
+            this.to_sc.Location = new System.Drawing.Point(15, 88);
+            this.to_sc.Name = "to_sc";
+            this.to_sc.Size = new System.Drawing.Size(96, 17);
+            this.to_sc.TabIndex = 24;
+            this.to_sc.Text = "Convert to *.sc";
+            this.to_sc.UseVisualStyleBackColor = true;
+            this.to_sc.CheckedChanged += new System.EventHandler(this.to_sc_CheckedChanged);
+            // 
+            // NNNrename
+            // 
+            this.NNNrename.AutoSize = true;
+            this.NNNrename.Location = new System.Drawing.Point(15, 112);
+            this.NNNrename.Name = "NNNrename";
+            this.NNNrename.Size = new System.Drawing.Size(119, 17);
+            this.NNNrename.TabIndex = 25;
+            this.NNNrename.Text = "Rename to NNN.sc";
+            this.NNNrename.UseVisualStyleBackColor = true;
+            this.NNNrename.CheckedChanged += new System.EventHandler(this.NNNrename_CheckedChanged);
+            // 
             // SettingsPage
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(240, 227);
+            this.ClientSize = new System.Drawing.Size(256, 275);
+            this.Controls.Add(this.NNNrename);
+            this.Controls.Add(this.to_sc);
             this.Controls.Add(this.log_file);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.is_debug);
@@ -156,5 +183,7 @@
         private System.Windows.Forms.CheckBox is_debug;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.TextBox log_file;
+        private System.Windows.Forms.CheckBox to_sc;
+        private System.Windows.Forms.CheckBox NNNrename;
     }
 }

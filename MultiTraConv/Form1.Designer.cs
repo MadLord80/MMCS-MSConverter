@@ -48,6 +48,7 @@
             this.start_convert = new System.Windows.Forms.Button();
             this.stop_convert = new System.Windows.Forms.Button();
             this.button_Settings = new System.Windows.Forms.Button();
+            this.Help_button = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // mp3dir_dialog
@@ -78,18 +79,18 @@
             this.label1.AutoSize = true;
             this.label1.Location = new System.Drawing.Point(12, 20);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(104, 13);
+            this.label1.Size = new System.Drawing.Size(129, 13);
             this.label1.TabIndex = 2;
-            this.label1.Text = "MP3 directory (input)";
+            this.label1.Text = "Input directory (mp3, wav)";
             // 
             // label2
             // 
             this.label2.AutoSize = true;
             this.label2.Location = new System.Drawing.Point(12, 53);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(113, 13);
+            this.label2.Size = new System.Drawing.Size(128, 13);
             this.label2.TabIndex = 3;
-            this.label2.Text = "OMA directory (output)";
+            this.label2.Text = "Output directory (oma, sc)";
             // 
             // oma_path
             // 
@@ -214,12 +215,23 @@
             this.button_Settings.UseVisualStyleBackColor = true;
             this.button_Settings.Click += new System.EventHandler(this.button_Settings_Click);
             // 
+            // Help_button
+            // 
+            this.Help_button.Location = new System.Drawing.Point(75, 75);
+            this.Help_button.Name = "Help_button";
+            this.Help_button.Size = new System.Drawing.Size(23, 32);
+            this.Help_button.TabIndex = 17;
+            this.Help_button.Text = "?";
+            this.Help_button.UseVisualStyleBackColor = true;
+            this.Help_button.Click += new System.EventHandler(this.Help_button_Click);
+            // 
             // MultiTraConv
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoScroll = true;
             this.ClientSize = new System.Drawing.Size(970, 509);
+            this.Controls.Add(this.Help_button);
             this.Controls.Add(this.button_Settings);
             this.Controls.Add(this.stop_convert);
             this.Controls.Add(this.start_convert);
@@ -239,7 +251,7 @@
             this.MinimumSize = new System.Drawing.Size(986, 547);
             this.Name = "MultiTraConv";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "MultiTraConv";
+            this.Text = "MMCS MultiTraConv";
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -266,6 +278,7 @@
         private System.Windows.Forms.Button start_convert;
         private System.Windows.Forms.Button stop_convert;
         private System.Windows.Forms.Button button_Settings;
+        private System.Windows.Forms.Button Help_button;
     }
 }
 
