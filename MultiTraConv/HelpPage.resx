@@ -117,7 +117,7 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="label1.Text" xml:space="preserve">
+  <data name="textBox1.Text" xml:space="preserve">
     <value>MMCS MultiTraConv
 
 Программа для конвертации музыкальных файлов mp3 и wav в формат ATRAC3Plus (WAV), поддерживаемый MMCS.
@@ -126,10 +126,9 @@
 Для работы консольной утилиты TraConv.exe необходимо установить пакет Sony OpenMG (Sony Media Library Earth - 
 https://cloud.mail.ru/public/J14i/z8BzvDGqE).
 
-MadLord, 2017 (madlord.info)
-</value>
+MadLord, 2017 (madlord.info)</value>
   </data>
-  <data name="label2.Text" xml:space="preserve">
+  <data name="textBox2.Text" xml:space="preserve">
     <value>Input directory (mp3, wav) - путь к каталогу с mp3 и/или wav файлами. Каталог может содержать любые вложенные 
 каталоги, главное - наличие файлов с расширением *.mp3 и/или wav.
 
@@ -140,7 +139,7 @@ Input directory - d:\music
 Output directory - d:\sc
 полный путь к сконвертированному файлу будет d:\oma\russian\b2\мой рок-н-рол.sc</value>
   </data>
-  <data name="label3.Text" xml:space="preserve">
+  <data name="textBox3.Text" xml:space="preserve">
     <value>Max processes - MMCS MultiTraConv может конвертировать одновременно несколько файлов, но на это уходят
 системные ресурсы, поэтому, чтобы сильно не напрягать комп, стоит ограничение. По уолчанию, 1.
 Можете увеличить значение, если считаете нужным.
