@@ -15,7 +15,10 @@ TraConv.exe
 *.userprefs
 
 # Build results
-[Dd]ebug/
+log.txt
+*.config
+*.vshost.exe
+*.manifest
 [Dd]ebugPublic/
 [Rr]elease/
 [Rr]eleases/
