@@ -126,7 +126,7 @@
 Для работы консольной утилиты TraConv.exe необходимо установить пакет Sony OpenMG (Sony Media Library Earth - 
 https://cloud.mail.ru/public/J14i/z8BzvDGqE).
 
-MadLord, 2017 (madlord.info)</value>
+MadLord, 2017 (madlord.info, https://github.com/MadLord80/MultiTraConv)</value>
   </data>
   <data name="textBox2.Text" xml:space="preserve">
     <value>Input directory (mp3, wav) - путь к каталогу с mp3 и/или wav файлами. Каталог может содержать любые вложенные 

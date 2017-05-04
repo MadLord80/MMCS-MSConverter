@@ -32,8 +32,8 @@
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.textBox2 = new System.Windows.Forms.TextBox();
+            this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.textBox3 = new System.Windows.Forms.TextBox();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -72,16 +72,6 @@
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Help";
             // 
-            // groupBox3
-            // 
-            this.groupBox3.Controls.Add(this.textBox3);
-            this.groupBox3.Location = new System.Drawing.Point(10, 168);
-            this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(609, 239);
-            this.groupBox3.TabIndex = 1;
-            this.groupBox3.TabStop = false;
-            this.groupBox3.Text = "Settings";
-            // 
             // textBox2
             // 
             this.textBox2.Location = new System.Drawing.Point(10, 19);
@@ -92,6 +82,16 @@
             this.textBox2.TabIndex = 2;
             this.textBox2.TabStop = false;
             this.textBox2.Text = resources.GetString("textBox2.Text");
+            // 
+            // groupBox3
+            // 
+            this.groupBox3.Controls.Add(this.textBox3);
+            this.groupBox3.Location = new System.Drawing.Point(10, 168);
+            this.groupBox3.Name = "groupBox3";
+            this.groupBox3.Size = new System.Drawing.Size(609, 239);
+            this.groupBox3.TabIndex = 1;
+            this.groupBox3.TabStop = false;
+            this.groupBox3.Text = "Settings";
             // 
             // textBox3
             // 

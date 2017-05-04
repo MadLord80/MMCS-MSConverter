@@ -15,7 +15,7 @@ namespace MultiTraConv
         private Int32 _start_table_height = 363;
         private bool to_stop = false;
         private FileStream log;
-
+        
         private byte[] sc_header = new byte[80] {
             0x52, 0x49, 0x46, 0x46, 0x00, 0x00, 0x00, 0x00, 0x57, 0x41, 0x56, 0x45,
             0x66, 0x6D, 0x74, 0x20, 0x34, 0x00, 0x00, 0x00, 0xFE, 0xFF, 0x02, 0x00,
@@ -281,13 +281,13 @@ namespace MultiTraConv
         private void button_Settings_Click(object sender, EventArgs e)
         {
             SettingsPage sp = new SettingsPage(this);
-            sp.Show();
+            sp.ShowDialog();
         }
 
         private void Help_button_Click(object sender, EventArgs e)
         {
             HelpPage hp = new HelpPage();
-            hp.Show();
+            hp.ShowDialog();
         }
     }
 }
