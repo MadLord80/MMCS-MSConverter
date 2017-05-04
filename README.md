@@ -7,6 +7,8 @@ To convert files to the standard ATRAC3Plus format, the program uses the TraConv
 To use the TraConv.exe console utility, you need to install the Sony OpenMG package (Sony Media Library Earth - 
 https://cloud.mail.ru/public/J14i/z8BzvDGqE).
 
+Download - https://github.com/MadLord80/MultiTraConv/tree/master/MultiTraConv/bin/Debug
+
 MadLord, 2017 (madlord.info)
 
 Input directory (mp3, wav) - path to the directory with mp3 and/or wav files. The directory can contain any nested directories, the main thing - the presence of files with the extension mp3 and/or wav.
