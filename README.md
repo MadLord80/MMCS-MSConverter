@@ -3,9 +3,9 @@ MP3/WAV to ATRAC3plus (WAV) multi converter (for MMCS Music Server)
 
 Program for converting mp3 and wav music files to ATRAC3Plus (WAV) format, supported by MMCS.
 To convert files to the standard ATRAC3Plus format, the program uses the TraConv.exe console utility
-(http://www.vector.co.jp/soft/winnt/art/se492660.html).  
+(http://www.vector.co.jp/soft/winnt/art/se492660.html, https://github.com/MadLord80/MultiTraConv/blob/master/TraConv.exe).  
 To use the TraConv.exe console utility, you need to install the Sony OpenMG package (Sony Media Library Earth - 
-https://cloud.mail.ru/public/J14i/z8BzvDGqE).
+https://github.com/MadLord80/MultiTraConv/blob/master/OpenMG.rar).
 
 Download - https://github.com/MadLord80/MultiTraConv/tree/master/MultiTraConv/bin/Debug
 
