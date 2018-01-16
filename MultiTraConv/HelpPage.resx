@@ -122,7 +122,7 @@
 
 Программа для конвертации музыкальных файлов mp3 и wav в формат ATRAC3Plus (WAV), поддерживаемый MMCS.
 Для конвертации файлов в стандартный формат ATRAC3Plus программа использует консольную утилиту TraConv.exe
-(http://www.vector.co.jp/soft/winnt/art/se492660.html).
+(http://www.vector.co.jp/soft/winnt/art/se492660.html). Утилита должна находиться в том же каталоге, где и MMCS MultiTraConv.
 Для работы консольной утилиты TraConv.exe необходимо установить пакет Sony OpenMG (Sony Media Library Earth - 
 https://cloud.mail.ru/public/J14i/z8BzvDGqE).
 
