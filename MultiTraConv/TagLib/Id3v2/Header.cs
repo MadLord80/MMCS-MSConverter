@@ -105,10 +105,10 @@ namespace TagLib.Id3v2 {
 		/// <value>
 		///    "ID3"
 		/// </value>
-		//public static readonly ReadOnlyByteVector FileIdentifier = "ID3";
+		public static readonly ReadOnlyByteVector FileIdentifier = "ID3";
 		//public static readonly ReadOnlyByteVector FileIdentifier = "ea3";
-		public static ReadOnlyByteVector FileIdentifier = "ea3";
-		public static readonly ReadOnlyByteVector[] FileIdentifiers = new ReadOnlyByteVector[] {"ID3", "ea3"};
+		//public static ReadOnlyByteVector FileIdentifier = "ea3";
+		//public static readonly ReadOnlyByteVector[] FileIdentifiers = new ReadOnlyByteVector[] {"ID3", "ea3"};
 
 		#endregion
 
@@ -142,18 +142,18 @@ namespace TagLib.Id3v2 {
 				throw new CorruptFileException (
 					"Provided data is smaller than object size.");
 
-			Boolean hasIdentifier = false;
-			for (int i = 0; i < FileIdentifiers.Length; i++)
-			{
-				if (data.StartsWith(FileIdentifiers[i]))
-				{
-					hasIdentifier = true;
-					FileIdentifier = FileIdentifiers[i];
-					break;
-				}
-			}
-			//if (!data.StartsWith (FileIdentifier))
-			if (!hasIdentifier)
+			//Boolean hasIdentifier = false;
+			//for (int i = 0; i < FileIdentifiers.Length; i++)
+			//{
+			//	if (data.StartsWith(FileIdentifiers[i]))
+			//	{
+			//		hasIdentifier = true;
+			//		FileIdentifier = FileIdentifiers[i];
+			//		break;
+			//	}
+			//}
+			//if (!hasIdentifier)
+			if (!data.StartsWith (FileIdentifier))
 				throw new CorruptFileException (
 					"Provided data does not start with the file identifier");
 			

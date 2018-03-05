@@ -6,15 +6,18 @@ using System.Text;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace MultiTraConv
 {
-    public partial class MultiTraConv : Form
-    {
-        private Int32 _start_form_height = 547;
-        private Int32 _start_table_height = 363;
-        private bool to_stop = false;
-        private FileStream log;
+	public partial class MultiTraConv : Form
+	{
+		private Int32 _start_form_height = 547;
+		private Int32 _start_table_height = 363;
+		private bool to_stop = false;
+		private FileStream log;
+		private DirectoryInfo root_dir;
+		private Dictionary<string, bool[]> converted_dirs = new Dictionary<string, bool[]>();
         
         private byte[] sc_header = new byte[80] {
             0x52, 0x49, 0x46, 0x46, 0x00, 0x00, 0x00, 0x00, 0x57, 0x41, 0x56, 0x45,
@@ -61,26 +64,30 @@ namespace MultiTraConv
         {
             if (this.mp3dir_dialog.ShowDialog() == DialogResult.OK)
             {
-                var mp3_dir = new DirectoryInfo(this.mp3dir_dialog.SelectedPath);
-                FileInfo[] audio_files = mp3_dir.GetFiles("*.mp3", SearchOption.AllDirectories).Where(f => f.Extension==".mp3").ToArray<FileInfo>();
-                FileInfo[] audio2_files = mp3_dir.GetFiles("*.wav", SearchOption.AllDirectories).Where(f => f.Extension == ".wav").ToArray<FileInfo>();
-                int audio_files_length = audio_files.Length;
-                Array.Resize(ref audio_files, audio_files.Length + audio2_files.Length);
-                Array.ConstrainedCopy(audio2_files, 0, audio_files, audio_files_length, audio2_files.Length);
-                audio2_files = null;
-                if (audio_files.Length > 0)
-                {
-                    this.progressBar.Maximum = audio_files.Length;
-                    this.all_count.Text = audio_files.Length.ToString();
-                    this.mp3_path.Text = this.mp3dir_dialog.SelectedPath;
-                    fill_files_table(audio_files);
-                }
-                else
-                {
-                    MessageBox.Show("No MP3 files in directory!");
-                }
-            }
-        }
+                DirectoryInfo mp3_dir = new DirectoryInfo(this.mp3dir_dialog.SelectedPath);
+				//FileInfo[] audio_files = mp3_dir.GetFiles("*.mp3", SearchOption.AllDirectories).Where(f => f.Extension==".mp3").ToArray<FileInfo>();
+				//FileInfo[] audio2_files = mp3_dir.GetFiles("*.wav", SearchOption.AllDirectories).Where(f => f.Extension == ".wav").ToArray<FileInfo>();
+				//int audio_files_length = audio_files.Length;
+				//Array.Resize(ref audio_files, audio_files.Length + audio2_files.Length);
+				//Array.ConstrainedCopy(audio2_files, 0, audio_files, audio_files_length, audio2_files.Length);
+				//audio2_files = null;
+				//if (audio_files.Length > 0)
+				//{
+				//    this.progressBar.Maximum = audio_files.Length;
+				//    this.all_count.Text = audio_files.Length.ToString();
+				this.root_dir = mp3_dir;
+				this.progressBar.Maximum = 0;
+				this.mp3_path.Text = this.mp3dir_dialog.SelectedPath;
+				//    fill_files_table(audio_files);
+				this.FilesTable.Items.Clear();
+				fill_files_table(mp3_dir);
+				//}
+				//else
+				//{
+				//    MessageBox.Show("No MP3 or WAV files in directory!");
+				//}
+			}
+		}
 
         private void omadir_button_Click(object sender, EventArgs e)
         {
@@ -90,18 +97,49 @@ namespace MultiTraConv
             }
         }
 
-        private void fill_files_table(FileInfo[] mp3_files)
-        {
-            this.FilesTable.Items.Clear();
-            foreach (FileInfo file in mp3_files)
-            {
-                ListViewItem row = new ListViewItem(file.FullName);
-                row.SubItems.Add("ready");
-                this.FilesTable.Items.Add(row);
-            }
-        }
+		//     private void fill_files_table(FileInfo[] mp3_files)
+		//     {
+		//         this.FilesTable.Items.Clear();
+		//foreach (FileInfo file in mp3_files)
+		//{
+		//	ListViewItem row = new ListViewItem(file.FullName);
+		//	row.SubItems.Add("ready");
+		//	this.FilesTable.Items.Add(row);
+		//}
+		//     }
 
-        private void button1_Click(object sender, EventArgs e)
+		private void fill_files_table(DirectoryInfo dir)
+		{
+			FileInfo[] audio_files = Get_tracks_from_dir(dir);
+			if (audio_files.Length > 0)
+			{
+				this.progressBar.Maximum += audio_files.Length;
+				this.all_count.Text = this.progressBar.Maximum.ToString();
+				foreach (FileInfo track in audio_files)
+				{
+					ListViewItem row = new ListViewItem(track.FullName);
+					row.SubItems.Add("ready");
+					this.FilesTable.Items.Add(row);
+				}
+			}
+			foreach (DirectoryInfo subdir in dir.GetDirectories())
+			{
+				fill_files_table(subdir);
+			}
+		}
+
+		private FileInfo[] Get_tracks_from_dir(DirectoryInfo dir)
+		{
+			FileInfo[] audio_files = dir.GetFiles("*.mp3", SearchOption.TopDirectoryOnly).Where(f => f.Extension == ".mp3").ToArray<FileInfo>();
+			FileInfo[] audio2_files = dir.GetFiles("*.wav", SearchOption.TopDirectoryOnly).Where(f => f.Extension == ".wav").ToArray<FileInfo>();
+			int audio_files_length = audio_files.Length;
+			Array.Resize(ref audio_files, audio_files.Length + audio2_files.Length);
+			Array.ConstrainedCopy(audio2_files, 0, audio_files, audio_files_length, audio2_files.Length);
+			audio2_files = null;
+			return audio_files;
+		}
+
+		private void button1_Click(object sender, EventArgs e)
         {
             if (this.FilesTable.Items.Count > 0 && this.oma_path.TextLength > 0)
             {
@@ -119,93 +157,226 @@ namespace MultiTraConv
                     log = new FileStream(Path.GetDirectoryName(Application.ExecutablePath) + "\\" + log_file, FileMode.Create, FileAccess.Write);
                 }
 
-                convert();
-            }
+				string traconv_path = Path.GetDirectoryName(Application.ExecutablePath) + "\\TraConv.exe";
+				if (!File.Exists(traconv_path))
+				{
+					MessageBox.Show("Can`t find " + traconv_path + "!");
+					return;
+				}
+
+				//convert(traconv_path);
+				convertDirs(this.root_dir, traconv_path);
+			}
         }
 
-        private async void convert()
-        {
-            int cur_max_async = max_async;
+		private async void convertDirs(DirectoryInfo dir, string traconv_path)
+		{
+			this.converted_dirs.Add(dir.FullName, new bool[] {false, false});
+			//this.dir_converted = false;
+			convert2(traconv_path, dir);
+			while (!this.converted_dirs[dir.FullName][1])
+			{
+				await Task.Delay(2000);
+			}
+			Application.DoEvents();
+			Console.WriteLine("dir " + dir.Name + " converted");
+			foreach (DirectoryInfo subdir in dir.GetDirectories())
+			{
+				//while (!this.dir_converted)
+				//{
+				//	await Task.Delay(2000);
+				//}
+				convertDirs(subdir, traconv_path);
+			}
 
-            var app_dir = Path.GetDirectoryName(Application.ExecutablePath);
-            ProcessStartInfo startInfo = new ProcessStartInfo(app_dir + "\\TraConv.exe");
-            startInfo.CreateNoWindow = true;
-            startInfo.UseShellExecute = false;
-            startInfo.RedirectStandardOutput = true;
+			this.start_convert.Enabled = true;
+			this.button_Settings.Enabled = true;
+			this.stop_convert.Enabled = false;
 
-            string prev_dir = "";
-            int NNN_cnt = 1;
-            foreach (ListViewItem row in this.FilesTable.Items)
-            {
-                if (to_stop)
-                {
-                    to_stop = false;
-                    break;
-                }
+			if (debug)
+			{
+				log.Close();
+			}
+		}
+
+		private async void convert2(string traconv_path, DirectoryInfo dir)
+		{
+			int cur_max_async = max_async;
+
+			ProcessStartInfo startInfo = new ProcessStartInfo(traconv_path);
+			startInfo.CreateNoWindow = true;
+			startInfo.UseShellExecute = false;
+			startInfo.RedirectStandardOutput = true;
+
+			//string prev_dir = "";
+			int NNN_cnt = 1;
+			//foreach (ListViewItem row in this.FilesTable.Items)
+			Console.WriteLine(dir.Name);
+			FileInfo[] dir_tracks = Get_tracks_from_dir(dir);
+			if (dir_tracks.Length == 0)
+			{
+				this.converted_dirs[dir.FullName] = new bool[] { true, true };
+			}
+			foreach (FileInfo track in dir_tracks)
+			{
+				Console.WriteLine(track.Name + ": " + NNN_cnt);
+				if (to_stop)
+				{
+					to_stop = false;
+					break;
+				}
+
+				//string filename = row.Text;
+				string filename = track.FullName;
+				ListViewItem row = this.FilesTable.FindItemWithText(filename);
+
+				//string[] xpath = filename.Split('\\');
+				//xpath.SetValue("", xpath.Length - 1);
+				//if (prev_dir != String.Join("\\", xpath)) NNN_cnt = 1;
+				//prev_dir = String.Join("\\", xpath);
+
+				string add_path = filename.Remove(0, mp3_path.TextLength);
+				add_path = add_path.Remove(add_path.Length - 3, 3) + "oma";
+				string new_path = oma_path.Text + add_path;
+				string new_path_sc = new_path.Remove(new_path.Length - 3, 3) + "sc";
+				if (File.Exists(new_path) || File.Exists(new_path_sc))
+				{
+					if (!File.Exists(new_path_sc) && to_sc)
+					{
+						change_header(new_path, NNN_cnt);
+						row.SubItems[1].Text = "converted";
+						NNN_cnt++;
+					}
+					else
+					{
+						row.SubItems[1].Text = "skipped (file exists)";
+					}
+					this.progressBar.PerformStep();
+					this.conv_count.Text = this.progressBar.Value.ToString();
+					continue;
+				}
+				string new_path_quoted = '"' + new_path + '"';
+				startInfo.Arguments = '"' + filename + '"' + " --Convert --FileType OMAP --BitRate " + max_bitrate * 1000 + " --Output " + new_path_quoted;
+
+				// wait for anyone started processes is finished
+				//Console.WriteLine("max async: " + max_async);
+				while (max_async == 0)
+				{
+					await Task.Delay(2000);
+				}
+				if (to_stop)
+				{
+					to_stop = false;
+					break;
+				}
+				row.SubItems[1].Text = "converting...";
+				max_async--;
+				Process traconv = new Process();
+				traconv.StartInfo = startInfo;
+				traconv.Start();
+				get_result(traconv, row, new_path, NNN_cnt, dir.FullName);
+				NNN_cnt++;
+			}
+			// wait for all started processes is finished
+			while (max_async < cur_max_async)
+			{
+				await Task.Delay(2000);
+			}
+			Application.DoEvents();
+			this.converted_dirs[dir.FullName][0] = true;
+			//this.dir_converted = true;
+			//this.start_convert.Enabled = true;
+			//this.button_Settings.Enabled = true;
+			//this.stop_convert.Enabled = false;
+
+			//if (debug)
+			//{
+			//	log.Close();
+			//}
+		}
+
+		//private async void convert(string traconv_path)
+  //      {
+  //          int cur_max_async = max_async;
+			
+		//	ProcessStartInfo startInfo = new ProcessStartInfo(traconv_path);
+		//	startInfo.CreateNoWindow = true;
+  //          startInfo.UseShellExecute = false;
+  //          startInfo.RedirectStandardOutput = true;
+
+  //          string prev_dir = "";
+  //          int NNN_cnt = 1;
+  //          foreach (ListViewItem row in this.FilesTable.Items)
+  //          {
+  //              if (to_stop)
+  //              {
+  //                  to_stop = false;
+  //                  break;
+  //              }
                 
-                string filename = row.Text;
+  //              string filename = row.Text;
                 
-                string[] xpath = filename.Split('\\');
-                xpath.SetValue("", xpath.Length - 1);
-                if (prev_dir != String.Join("\\", xpath)) NNN_cnt = 1;
-                prev_dir = String.Join("\\", xpath);
+  //              string[] xpath = filename.Split('\\');
+  //              xpath.SetValue("", xpath.Length - 1);
+  //              if (prev_dir != String.Join("\\", xpath)) NNN_cnt = 1;
+  //              prev_dir = String.Join("\\", xpath);
 
-                string add_path = filename.Remove(0, mp3_path.TextLength);
-                add_path = add_path.Remove(add_path.Length - 3, 3) + "oma";
-                string new_path = oma_path.Text + add_path;
-                string new_path_sc = new_path.Remove(new_path.Length - 3, 3) + "sc";
-                if (File.Exists(new_path) || File.Exists(new_path_sc))
-                {
-                    if (! File.Exists(new_path_sc) && to_sc)
-                    {
-                        change_header(new_path, NNN_cnt);
-                        row.SubItems[1].Text = "converted";
-                        NNN_cnt++;
-                    }
-                    else
-                    {
-                        row.SubItems[1].Text = "skipped (file exists)";
-                    }
-                    this.progressBar.PerformStep();
-                    this.conv_count.Text = this.progressBar.Value.ToString();
-                    continue;
-                }
-                string new_path_quoted = '"' + new_path + '"';
-                startInfo.Arguments = '"' + filename + '"' + " --Convert --FileType OMAP --BitRate " + max_bitrate * 1000 + " --Output " + new_path_quoted;
+  //              string add_path = filename.Remove(0, mp3_path.TextLength);
+  //              add_path = add_path.Remove(add_path.Length - 3, 3) + "oma";
+  //              string new_path = oma_path.Text + add_path;
+  //              string new_path_sc = new_path.Remove(new_path.Length - 3, 3) + "sc";
+  //              if (File.Exists(new_path) || File.Exists(new_path_sc))
+  //              {
+  //                  if (! File.Exists(new_path_sc) && to_sc)
+  //                  {
+  //                      change_header(new_path, NNN_cnt);
+  //                      row.SubItems[1].Text = "converted";
+  //                      NNN_cnt++;
+  //                  }
+  //                  else
+  //                  {
+  //                      row.SubItems[1].Text = "skipped (file exists)";
+  //                  }
+  //                  this.progressBar.PerformStep();
+  //                  this.conv_count.Text = this.progressBar.Value.ToString();
+  //                  continue;
+  //              }
+  //              string new_path_quoted = '"' + new_path + '"';
+  //              startInfo.Arguments = '"' + filename + '"' + " --Convert --FileType OMAP --BitRate " + max_bitrate * 1000 + " --Output " + new_path_quoted;
 
-                while (max_async == 0)
-                {
-                    await Task.Delay(2000);
-                }
-                if (to_stop)
-                {
-                    to_stop = false;
-                    break;
-                }
-                row.SubItems[1].Text = "converting...";
-                max_async--;
-                Process traconv = new Process();
-                traconv.StartInfo = startInfo;
-                traconv.Start();
-                get_result(traconv, row, new_path, NNN_cnt);
-                NNN_cnt++;
-            }
-            while (max_async < cur_max_async)
-            {
-                await Task.Delay(2000);
-            }
-            Application.DoEvents();
-            this.start_convert.Enabled = true;
-            this.button_Settings.Enabled = true;
-            this.stop_convert.Enabled = false;
+  //              while (max_async == 0)
+  //              {
+  //                  await Task.Delay(2000);
+  //              }
+  //              if (to_stop)
+  //              {
+  //                  to_stop = false;
+  //                  break;
+  //              }
+  //              row.SubItems[1].Text = "converting...";
+  //              max_async--;
+  //              Process traconv = new Process();
+  //              traconv.StartInfo = startInfo;
+  //              traconv.Start();
+  //              get_result(traconv, row, new_path, NNN_cnt);
+  //              NNN_cnt++;
+  //          }
+  //          while (max_async < cur_max_async)
+  //          {
+  //              await Task.Delay(2000);
+  //          }
+  //          Application.DoEvents();
+  //          this.start_convert.Enabled = true;
+  //          this.button_Settings.Enabled = true;
+  //          this.stop_convert.Enabled = false;
 
-            if (debug)
-            {
-                log.Close();
-            }
-        }
+  //          if (debug)
+  //          {
+  //              log.Close();
+  //          }
+  //      }
 
-        private async void get_result (Process proc, ListViewItem item, string new_path, int NNN)
+        private async void get_result (Process proc, ListViewItem item, string new_path, int NNN, string dir)
         {
             string p_out = await proc.StandardOutput.ReadToEndAsync();
             if (!p_out.Contains("Location=" + new_path)) {
@@ -214,8 +385,14 @@ namespace MultiTraConv
             else
             {
                 item.SubItems[1].Text = "converted";
-                if (to_sc) change_header(new_path, NNN);
-                this.progressBar.PerformStep();
+				//if (to_sc) change_header(new_path, NNN);
+				change_header(new_path, NNN);
+				Console.WriteLine(item.Text + ": converted");
+				if (this.converted_dirs[dir][0])
+				{
+					this.converted_dirs[dir][1] = true;
+				}
+				this.progressBar.PerformStep();
                 this.conv_count.Text = this.progressBar.Value.ToString();
             }
             if (debug)
@@ -224,17 +401,23 @@ namespace MultiTraConv
                 log.Write(out_text, 0, out_text.Length);
             }
             max_async++;
+			//Console.WriteLine(max_async);
         }
 
         private void change_header(string oma_file, int NNN)
         {
             string sc_file = oma_file.Remove(oma_file.Length - 3, 3) + "sc";
-            if (NNNrename)
+
+			string[] omas = oma_file.Split('\\');
+			string omaf = omas[omas.Length - 1].Remove(omas[omas.Length - 1].Length - 3, 3);
+
+			// NNN - random!!!
+			if (NNNrename)
             {
                 string NNNst = (NNN.ToString().Length >= 3) ? NNN.ToString() : ((NNN.ToString().Length == 2) ? "0" + NNN.ToString() : "00" + NNN.ToString());
                 string[] NNNsc = sc_file.Split('\\');
-                NNNsc.SetValue(NNNst + ".sc", NNNsc.Length - 1);
-                sc_file = String.Join("\\", NNNsc);
+				NNNsc.SetValue(NNNst + ".sc", NNNsc.Length - 1);
+				sc_file = String.Join("\\", NNNsc);
             }
             
             FileStream in_file = new FileStream(oma_file, FileMode.Open, FileAccess.Read);
@@ -319,15 +502,59 @@ namespace MultiTraConv
 			//TagLib.File file = TagLib.File.Create("d:\\ID3V1andV2example.mp3");
 			//TagLib.File file = TagLib.File.Create("d:\\ID3V1andV2example.oma");
 			//TagLib.File file = TagLib.File.Create("d:\\01-Butch--Не Дали.mp3");
-			TagLib.File file = TagLib.File.Create("d:\\01-Butch--Не Дали.oma");
+			//TagLib.File file = TagLib.File.Create("d:\\01-Butch--Не Дали.oma");
 
-			Console.WriteLine("Artist: " + ((file.Tag.Performers.Length > 0) ? toUTF8(file.Tag.Performers[0]) : "Failed!!!"));
-			Console.WriteLine("Title: " + toUTF8(file.Tag.Title));
-			Console.WriteLine("Album: " + toUTF8(file.Tag.Album));
-			//char[] tt = file.Tag.Title.ToCharArray();
-			//Console.WriteLine(Encoding.Default == Encoding.GetEncoding(1251));
-			//string name1 = Encoding.UTF8.GetString(Encoding.Convert(Encoding.GetEncoding(1251), Encoding.UTF8, Encoding.GetEncoding(1251).GetBytes(file.Tag.Title)));
-			
+			//Console.WriteLine("Artist: " + ((file.Tag.Performers.Length > 0) ? toUTF8(file.Tag.Performers[0]) : "Failed!!!"));
+			//Console.WriteLine("Title: " + toUTF8(file.Tag.Title));
+			//Console.WriteLine("Album: " + toUTF8(file.Tag.Album));
+
+			//string log_file = "d:\\id3vtest\\id3v.log";
+			//string log_unkfile = "d:\\id3vtest\\id3v_unk.log";
+			//this.progressBar.Minimum = 0;
+			//this.progressBar.Maximum = this.FilesTable.Items.Count;
+			//this.progressBar.Value = 0;
+			//this.progressBar.Step = 1;
+			//foreach (ListViewItem row in this.FilesTable.Items)
+			//{
+			//	string filename = row.Text;
+			//	TagLib.File file = TagLib.File.Create(filename);
+			//	filename.Replace("\n", "").Replace("\r", "");
+			//	string artist = (file.Tag.Performers.Length > 0) ? toUTF8(file.Tag.Performers[0]) : "Empty";
+			//	string title = (file.Tag.Title != null && file.Tag.Title.Length > 0) ? toUTF8(file.Tag.Title) : "";
+			//	if (title.Length < 1)
+			//	{
+			//		char delim = '\\';
+			//		string[] parts = filename.Split(delim);
+			//		title = parts[parts.Length - 1];
+			//		title = toUTF8(title.Remove(title.Length - 4, 4));
+					
+			//		if (title.Contains(" - "))
+			//		{
+			//			string[] tar = title.Split(new string[] { " - " }, 2, StringSplitOptions.RemoveEmptyEntries);
+			//			if (tar.Length == 2)
+			//			{
+			//				char[] t0 = tar[0].ToCharArray().Where((c) => !char.IsDigit(c)).ToArray();
+			//				char[] t1 = tar[1].ToCharArray().Where((c) => !char.IsDigit(c)).ToArray();
+			//				if (t0.Length > 1 && t1.Length > 0)
+			//				{
+			//					File.AppendAllText(log_unkfile, String.Format("{0,64}:{1,64}: ", toUTF8(tar[0]), toUTF8(tar[1])));
+			//					File.AppendAllText(log_unkfile, toUTF8(filename) + "\n");
+			//					this.progressBar.PerformStep();
+			//					continue;
+			//				}
+			//			}
+			//		}
+			//	}
+			//	// in TITLE for title and artist - by 128 bytes!!!
+			//	// ё!!!
+			//	// delete start and end spaces!!!!
+			//	//string output = String.Format("{0,128}:{1,128}: ", title, artist);
+			//	string output = String.Format("{0,64}:{1,64}: ", title, artist);
+			//	File.AppendAllText(log_file, output);
+			//	File.AppendAllText(log_file, filename + "\n");
+			//	this.progressBar.PerformStep();
+			//}
+			//MessageBox.Show("Done");			
 		}
 	}
 }
