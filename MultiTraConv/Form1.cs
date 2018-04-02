@@ -175,15 +175,16 @@ namespace MultiTraConv
 			}
 		}
 
-		private async Task ConvertDirs(DirectoryInfo dir)
+		//private async Task ConvertDirs(DirectoryInfo dir)
+		private void ConvertDirs(DirectoryInfo dir)
 		{
 			this.converted_dirs.Add(dir.FullName, new bool[] { false, false });
 			//this.dir_converted = false;
 			Convert2(dir);
-			while (!this.converted_dirs[dir.FullName][1])
-			{
-				await Task.Delay(2000);
-			}
+			//while (!this.converted_dirs[dir.FullName][1])
+			//{
+			//	await Task.Delay(2000);
+			//}
 			Application.DoEvents();
 			Console.WriteLine("dir " + dir.Name + " converted");
 			foreach (DirectoryInfo subdir in dir.GetDirectories())
