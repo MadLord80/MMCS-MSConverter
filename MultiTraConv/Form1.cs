@@ -20,6 +20,7 @@ namespace MultiTraConv
 		private ProcessStartInfo startInfo;
 		private DirectoryInfo root_dir;
 		private Dictionary<string, bool[]> converted_dirs = new Dictionary<string, bool[]>();
+		private int tasks = 0;
 
 		private byte[] sc_header = new byte[80] {
 			0x52, 0x49, 0x46, 0x46, 0x00, 0x00, 0x00, 0x00, 0x57, 0x41, 0x56, 0x45,
@@ -32,7 +33,7 @@ namespace MultiTraConv
 		};
 
 		//Settings
-		public int max_async = 1;
+		public int max_async = 1;		
 		public int max_bitrate = 128;
 		public bool to_sc = true;
 		public bool NNNrename = false;
@@ -48,6 +49,14 @@ namespace MultiTraConv
 			this.progressBar.Minimum = 0;
 			this.progressBar.Value = 0;
 			this.progressBar.Step = 1;
+
+			// test
+			this.mp3_path.Text = "D:\\id3vtest\\!test_convert_dir";
+			this.oma_path.Text = "D:\\id3vtest\\!! музыкаoma";
+			this.root_dir = new DirectoryInfo(this.mp3_path.Text);
+			this.progressBar.Maximum = 0;
+			this.FilesTable.Items.Clear();
+			fill_files_table(this.root_dir);
 		}
 
 		private void MultiTraConv_SizeChanged(Object sender, EventArgs e)
@@ -178,7 +187,7 @@ namespace MultiTraConv
 		//private async Task ConvertDirs(DirectoryInfo dir)
 		private void ConvertDirs(DirectoryInfo dir)
 		{
-			this.converted_dirs.Add(dir.FullName, new bool[] { false, false });
+			//this.converted_dirs.Add(dir.FullName, new bool[] { false, false });
 			//this.dir_converted = false;
 			Convert2(dir);
 			//while (!this.converted_dirs[dir.FullName][1])
@@ -193,6 +202,10 @@ namespace MultiTraConv
 				//{
 				//	await Task.Delay(2000);
 				//}
+				while (tasks >= max_async)
+				{
+					Task.Delay(2000);
+				}
 				ConvertDirs(subdir);
 			}
 
@@ -206,19 +219,19 @@ namespace MultiTraConv
 			}
 		}
 
-		private async Task Convert2(DirectoryInfo dir)
+		private void Convert2(DirectoryInfo dir)
 		{
-			int cur_max_async = max_async;
+			//int cur_max_async = max_async;
 			
 			//string prev_dir = "";
 			int NNN_cnt = 1;
 			//foreach (ListViewItem row in this.FilesTable.Items)
 			Console.WriteLine(dir.Name);
 			FileInfo[] dir_tracks = Get_tracks_from_dir(dir);
-			if (dir_tracks.Length == 0)
-			{
-				this.converted_dirs[dir.FullName] = new bool[] { true, true };
-			}
+			//if (dir_tracks.Length == 0)
+			//{
+			//	this.converted_dirs[dir.FullName] = new bool[] { true, true };
+			//}
 			foreach (FileInfo track in dir_tracks)
 			{
 				Console.WriteLine(track.Name + ": " + NNN_cnt);
@@ -238,34 +251,42 @@ namespace MultiTraConv
 				//prev_dir = String.Join("\\", xpath);
 
 				string add_path = filename.Remove(0, mp3_path.TextLength);
-				add_path = add_path.Remove(add_path.Length - 3, 3) + "oma";
-				string new_path = oma_path.Text + add_path;
-				string new_path_sc = new_path.Remove(new_path.Length - 3, 3) + "sc";
-				if (File.Exists(new_path) || File.Exists(new_path_sc))
+				//add_path = add_path.Remove(add_path.Length - 3, 3) + "oma";
+				add_path = add_path.Remove(add_path.Length - 3, 3);
+				//string new_path = oma_path.Text + add_path;
+				//string new_path_sc = new_path.Remove(new_path.Length - 3, 3) + "sc";
+				string new_path_sc = oma_path.Text + add_path + "sc";
+				//if (File.Exists(new_path) || File.Exists(new_path_sc))
+				if (File.Exists(new_path_sc))
 				{
-					if (!File.Exists(new_path_sc) && to_sc)
-					{
-						change_header(new_path, NNN_cnt);
+					//if (!File.Exists(new_path_sc) && to_sc)
+					//{
+					//	change_header(new_path, NNN_cnt);
 						row.SubItems[1].Text = "converted";
 						NNN_cnt++;
-					}
-					else
-					{
-						row.SubItems[1].Text = "skipped (file exists)";
-					}
+					//}
+					//else
+					//{
+					//row.SubItems[1].Text = "skipped (file exists)";
+					//}
 					this.progressBar.PerformStep();
 					this.conv_count.Text = this.progressBar.Value.ToString();
 					continue;
 				}
-				string new_path_quoted = '"' + new_path + '"';
+				//string new_path_quoted = '"' + new_path + '"';
+				string new_path_quoted = '"' + new_path_sc + '"';
 				//startInfo.Arguments = '"' + filename + '"' + " --Convert --FileType OMAP --BitRate " + max_bitrate * 1000 + " --Output " + new_path_quoted;
 				string Arguments = '"' + filename + '"' + " --Convert --FileType OMAP --BitRate " + max_bitrate * 1000 + " --Output " + new_path_quoted;
 
 				// wait for anyone started processes is finished
 				//Console.WriteLine("max async: " + max_async);
-				while (max_async == 0)
+				//while (max_async == 0)
+				//{
+				//	await Task.Delay(2000);
+				//}
+				while (tasks >= max_async)
 				{
-					await Task.Delay(2000);
+					Task.Delay(2000);
 				}
 				if (to_stop)
 				{
@@ -273,19 +294,20 @@ namespace MultiTraConv
 					break;
 				}
 				row.SubItems[1].Text = "converting...";
-				max_async--;
-				await ConvertFile(Arguments, row, new_path, NNN_cnt, dir.FullName);
+				//max_async--;
+				//await ConvertFile(Arguments, row, new_path, NNN_cnt, dir.FullName);
+				ConvertFile(Arguments, row, filename, NNN_cnt);
 				//traconv.Start();
 				//get_result(traconv, row, new_path, NNN_cnt, dir.FullName);
 				NNN_cnt++;
 			}
 			// wait for all started processes is finished
-			while (max_async < cur_max_async)
-			{
-				await Task.Delay(2000);
-			}
-			Application.DoEvents();
-			this.converted_dirs[dir.FullName][0] = true;
+			//while (max_async < cur_max_async)
+			//{
+			//	await Task.Delay(2000);
+			//}
+			//Application.DoEvents();
+			//this.converted_dirs[dir.FullName][0] = true;
 			//this.dir_converted = true;
 			//this.start_convert.Enabled = true;
 			//this.button_Settings.Enabled = true;
@@ -297,130 +319,152 @@ namespace MultiTraConv
 			//}
 		}
 
-		private Task ConvertFile(string Arguments, ListViewItem row, string new_path, int NNN_cnt, string dirFullName)
+		private Task ConvertFile(string Arguments, ListViewItem row, string old_path, int NNN_cnt)
 		{
-			return Task.Run(() =>
-			{
+			tasks++;
+			var tcs = new TaskCompletionSource<bool>();
+			//return Task.Run(() =>
+			//return Task.Factory.StartNew(() =>
+			//{
+				Console.WriteLine(Arguments);
 				Process traconv = new Process();
 				startInfo.Arguments = Arguments;
 				traconv.StartInfo = startInfo;
+			traconv.Exited += (sender, args) =>
+			{
+				tcs.SetResult(true);
+				//traconv.Dispose();
+			};
 				traconv.Start();
-				get_result(traconv, row, new_path, NNN_cnt, dirFullName);
-			});
+				get_result(traconv, row, old_path, NNN_cnt);
+			return tcs.Task;
+			//}, TaskCreationOptions.AttachedToParent);
+			//return Task.CurrentId;
+			//}, TaskCreationOptions.LongRunning);
 		}
 
 		//private async void convert(string traconv_path)
-  //      {
-  //          int cur_max_async = max_async;
-			
+		//      {
+		//          int cur_max_async = max_async;
+
 		//	ProcessStartInfo startInfo = new ProcessStartInfo(traconv_path);
 		//	startInfo.CreateNoWindow = true;
-  //          startInfo.UseShellExecute = false;
-  //          startInfo.RedirectStandardOutput = true;
+		//          startInfo.UseShellExecute = false;
+		//          startInfo.RedirectStandardOutput = true;
 
-  //          string prev_dir = "";
-  //          int NNN_cnt = 1;
-  //          foreach (ListViewItem row in this.FilesTable.Items)
-  //          {
-  //              if (to_stop)
-  //              {
-  //                  to_stop = false;
-  //                  break;
-  //              }
-                
-  //              string filename = row.Text;
-                
-  //              string[] xpath = filename.Split('\\');
-  //              xpath.SetValue("", xpath.Length - 1);
-  //              if (prev_dir != String.Join("\\", xpath)) NNN_cnt = 1;
-  //              prev_dir = String.Join("\\", xpath);
+		//          string prev_dir = "";
+		//          int NNN_cnt = 1;
+		//          foreach (ListViewItem row in this.FilesTable.Items)
+		//          {
+		//              if (to_stop)
+		//              {
+		//                  to_stop = false;
+		//                  break;
+		//              }
 
-  //              string add_path = filename.Remove(0, mp3_path.TextLength);
-  //              add_path = add_path.Remove(add_path.Length - 3, 3) + "oma";
-  //              string new_path = oma_path.Text + add_path;
-  //              string new_path_sc = new_path.Remove(new_path.Length - 3, 3) + "sc";
-  //              if (File.Exists(new_path) || File.Exists(new_path_sc))
-  //              {
-  //                  if (! File.Exists(new_path_sc) && to_sc)
-  //                  {
-  //                      change_header(new_path, NNN_cnt);
-  //                      row.SubItems[1].Text = "converted";
-  //                      NNN_cnt++;
-  //                  }
-  //                  else
-  //                  {
-  //                      row.SubItems[1].Text = "skipped (file exists)";
-  //                  }
-  //                  this.progressBar.PerformStep();
-  //                  this.conv_count.Text = this.progressBar.Value.ToString();
-  //                  continue;
-  //              }
-  //              string new_path_quoted = '"' + new_path + '"';
-  //              startInfo.Arguments = '"' + filename + '"' + " --Convert --FileType OMAP --BitRate " + max_bitrate * 1000 + " --Output " + new_path_quoted;
+		//              string filename = row.Text;
 
-  //              while (max_async == 0)
-  //              {
-  //                  await Task.Delay(2000);
-  //              }
-  //              if (to_stop)
-  //              {
-  //                  to_stop = false;
-  //                  break;
-  //              }
-  //              row.SubItems[1].Text = "converting...";
-  //              max_async--;
-  //              Process traconv = new Process();
-  //              traconv.StartInfo = startInfo;
-  //              traconv.Start();
-  //              get_result(traconv, row, new_path, NNN_cnt);
-  //              NNN_cnt++;
-  //          }
-  //          while (max_async < cur_max_async)
-  //          {
-  //              await Task.Delay(2000);
-  //          }
-  //          Application.DoEvents();
-  //          this.start_convert.Enabled = true;
-  //          this.button_Settings.Enabled = true;
-  //          this.stop_convert.Enabled = false;
+		//              string[] xpath = filename.Split('\\');
+		//              xpath.SetValue("", xpath.Length - 1);
+		//              if (prev_dir != String.Join("\\", xpath)) NNN_cnt = 1;
+		//              prev_dir = String.Join("\\", xpath);
 
-  //          if (debug)
-  //          {
-  //              log.Close();
-  //          }
-  //      }
+		//              string add_path = filename.Remove(0, mp3_path.TextLength);
+		//              add_path = add_path.Remove(add_path.Length - 3, 3) + "oma";
+		//              string new_path = oma_path.Text + add_path;
+		//              string new_path_sc = new_path.Remove(new_path.Length - 3, 3) + "sc";
+		//              if (File.Exists(new_path) || File.Exists(new_path_sc))
+		//              {
+		//                  if (! File.Exists(new_path_sc) && to_sc)
+		//                  {
+		//                      change_header(new_path, NNN_cnt);
+		//                      row.SubItems[1].Text = "converted";
+		//                      NNN_cnt++;
+		//                  }
+		//                  else
+		//                  {
+		//                      row.SubItems[1].Text = "skipped (file exists)";
+		//                  }
+		//                  this.progressBar.PerformStep();
+		//                  this.conv_count.Text = this.progressBar.Value.ToString();
+		//                  continue;
+		//              }
+		//              string new_path_quoted = '"' + new_path + '"';
+		//              startInfo.Arguments = '"' + filename + '"' + " --Convert --FileType OMAP --BitRate " + max_bitrate * 1000 + " --Output " + new_path_quoted;
 
-        private async void get_result (Process proc, ListViewItem item, string new_path, int NNN, string dir)
-        {
-            string p_out = await proc.StandardOutput.ReadToEndAsync();
-            if (!p_out.Contains("Location=" + new_path)) {
-                item.SubItems[1].Text = "Error: " + proc.StartInfo.Arguments;
+		//              while (max_async == 0)
+		//              {
+		//                  await Task.Delay(2000);
+		//              }
+		//              if (to_stop)
+		//              {
+		//                  to_stop = false;
+		//                  break;
+		//              }
+		//              row.SubItems[1].Text = "converting...";
+		//              max_async--;
+		//              Process traconv = new Process();
+		//              traconv.StartInfo = startInfo;
+		//              traconv.Start();
+		//              get_result(traconv, row, new_path, NNN_cnt);
+		//              NNN_cnt++;
+		//          }
+		//          while (max_async < cur_max_async)
+		//          {
+		//              await Task.Delay(2000);
+		//          }
+		//          Application.DoEvents();
+		//          this.start_convert.Enabled = true;
+		//          this.button_Settings.Enabled = true;
+		//          this.stop_convert.Enabled = false;
+
+		//          if (debug)
+		//          {
+		//              log.Close();
+		//          }
+		//      }
+
+		//private async void get_result (Process proc, ListViewItem item, string new_path, int NNN, string dir)
+		private async void get_result(Process proc, ListViewItem item, string old_path, int NNN)
+		{
+			Console.WriteLine("get result: " + old_path);
+			string p_out = await proc.StandardOutput.ReadToEndAsync();
+			Console.WriteLine("get result code: " + proc.ExitCode);
+			Console.WriteLine("get result out: " + p_out);
+			//if (!p_out.Contains("Location=" + new_path)) {
+			if (!p_out.Contains("TargetTrack=" + old_path)) {
+				item.SubItems[1].Text = "Error: " + proc.StartInfo.Arguments;
             }
             else
             {
-                item.SubItems[1].Text = "converted";
+				item.SubItems[1].Text = "converted";
 				//if (to_sc) change_header(new_path, NNN);
-				change_header(new_path, NNN);
-				Console.WriteLine(item.Text + ": converted");
-				if (this.converted_dirs[dir][0])
-				{
-					this.converted_dirs[dir][1] = true;
-				}
+				//change_header(new_path, NNN);
+				Console.WriteLine("Convert OK");
+				//Console.WriteLine(item.Text + ": converted");
+				//if (this.converted_dirs[dir][0])
+				//{
+				//	this.converted_dirs[dir][1] = true;
+				//}
 				this.progressBar.PerformStep();
                 this.conv_count.Text = this.progressBar.Value.ToString();
             }
-            if (debug)
-            {
-                byte[] out_text = Encoding.GetEncoding(1251).GetBytes(p_out);
-                log.Write(out_text, 0, out_text.Length);
-            }
-            max_async++;
+			//if (debug)
+			//{
+			//    byte[] out_text = Encoding.GetEncoding(1251).GetBytes(p_out);
+			//    log.Write(out_text, 0, out_text.Length);
+			//}
+			tasks--;
+            //max_async++;
 			//Console.WriteLine(max_async);
         }
 
-        private void change_header(string oma_file, int NNN)
+		// CHECK!!!!!!!
+		private void change_header(string oma_file, int NNN)
         {
-            string sc_file = oma_file.Remove(oma_file.Length - 3, 3) + "sc";
+			return;
+			//string sc_file = oma_file.Remove(oma_file.Length - 3, 3) + "sc";
+			string sc_file = oma_file;
 
 			string[] omas = oma_file.Split('\\');
 			string omaf = omas[omas.Length - 1].Remove(omas[omas.Length - 1].Length - 3, 3);
@@ -511,8 +555,8 @@ namespace MultiTraConv
 			);
 		}
 
-		private void button1_Click_1(object sender, EventArgs e)
-		{
+		//private void button1_Click_1(object sender, EventArgs e)
+		//{
 			//TagLib.File file = TagLib.File.Create("d:\\ID3V1andV2example.mp3");
 			//TagLib.File file = TagLib.File.Create("d:\\ID3V1andV2example.oma");
 			//TagLib.File file = TagLib.File.Create("d:\\01-Butch--Не Дали.mp3");
@@ -569,6 +613,6 @@ namespace MultiTraConv
 			//	this.progressBar.PerformStep();
 			//}
 			//MessageBox.Show("Done");			
-		}
+		//}
 	}
 }

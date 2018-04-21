@@ -49,7 +49,6 @@
 			this.stop_convert = new System.Windows.Forms.Button();
 			this.button_Settings = new System.Windows.Forms.Button();
 			this.Help_button = new System.Windows.Forms.Button();
-			this.button1 = new System.Windows.Forms.Button();
 			this.SuspendLayout();
 			// 
 			// mp3dir_dialog
@@ -226,23 +225,12 @@
 			this.Help_button.UseVisualStyleBackColor = true;
 			this.Help_button.Click += new System.EventHandler(this.Help_button_Click);
 			// 
-			// button1
-			// 
-			this.button1.Location = new System.Drawing.Point(599, 75);
-			this.button1.Name = "button1";
-			this.button1.Size = new System.Drawing.Size(75, 23);
-			this.button1.TabIndex = 18;
-			this.button1.Text = "button1";
-			this.button1.UseVisualStyleBackColor = true;
-			this.button1.Click += new System.EventHandler(this.button1_Click_1);
-			// 
 			// MultiTraConv
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.AutoScroll = true;
 			this.ClientSize = new System.Drawing.Size(970, 509);
-			this.Controls.Add(this.button1);
 			this.Controls.Add(this.Help_button);
 			this.Controls.Add(this.button_Settings);
 			this.Controls.Add(this.stop_convert);
@@ -291,7 +279,6 @@
         private System.Windows.Forms.Button stop_convert;
         private System.Windows.Forms.Button button_Settings;
         private System.Windows.Forms.Button Help_button;
-		private System.Windows.Forms.Button button1;
 	}
 }
 
