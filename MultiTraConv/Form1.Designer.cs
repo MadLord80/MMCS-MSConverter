@@ -157,7 +157,7 @@
 			// all_count
 			// 
 			this.all_count.AutoSize = true;
-			this.all_count.Location = new System.Drawing.Point(451, 96);
+			this.all_count.Location = new System.Drawing.Point(501, 96);
 			this.all_count.Name = "all_count";
 			this.all_count.Size = new System.Drawing.Size(13, 13);
 			this.all_count.TabIndex = 9;
@@ -175,7 +175,7 @@
 			// conv_count
 			// 
 			this.conv_count.AutoSize = true;
-			this.conv_count.Location = new System.Drawing.Point(492, 96);
+			this.conv_count.Location = new System.Drawing.Point(464, 96);
 			this.conv_count.Name = "conv_count";
 			this.conv_count.Size = new System.Drawing.Size(13, 13);
 			this.conv_count.TabIndex = 11;
