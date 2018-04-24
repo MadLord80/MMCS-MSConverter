@@ -22,7 +22,7 @@ namespace MultiTraConv
         private void Settings_Load(object sender, EventArgs e)
         {
             this.user_max_async.Value = mform.max_async;
-            this.user_max_bitrate.SelectedItem = mform.max_bitrate.ToString();
+            //this.user_max_bitrate.SelectedItem = mform.max_bitrate.ToString();
         }
 
         private void user_max_async_ValueChanged(object sender, EventArgs e)
@@ -32,7 +32,7 @@ namespace MultiTraConv
 
         private void user_max_bitrate_SelectedIndexChanged(object sender, EventArgs e)
         {
-            mform.max_bitrate = Convert.ToInt32(this.user_max_bitrate.SelectedItem);
+            //mform.max_bitrate = Convert.ToInt32(this.user_max_bitrate.SelectedItem);
         }
 
         private void button1_Click(object sender, EventArgs e)
