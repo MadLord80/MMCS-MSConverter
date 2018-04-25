@@ -23,6 +23,8 @@ namespace MultiTraConv
 		private Dictionary<string, bool[]> converted_dirs = new Dictionary<string, bool[]>();
 		private int tasks = 0;
 
+		private string codePage = "iso-8859-5";
+
 		private delegate void LVIDelegate(string filename, string Text);
 		private delegate void PBDelegate();
 		private delegate void SCDelegate();
@@ -200,6 +202,7 @@ namespace MultiTraConv
 				to_stop = false;
 				this.start_convert.Enabled = true;
 				this.button_Settings.Enabled = true;
+				//MessageBox.Show("Done");
 				//this.stop_convert.Enabled = false;
 			}
 		}
@@ -398,10 +401,11 @@ namespace MultiTraConv
 		private void CreateTitle(DirectoryInfo dir)
 		{
 			// if dir is mp3 dir - IF STOP PRESSED COUNT OF mp3 FILES != COUNT OF sc FILES!!!!
-			//DirectoryInfo sc_dir = new DirectoryInfo(oma_path.Text + dir.FullName.Remove(0, mp3_path.TextLength));
 
-			// try to dir is sc dir
+			FileInfo[] sc_files = Get_output_tracks_from_dir(dir);
+			if (sc_files.Length == 0) { return; }
 			FileStream title_file = new FileStream(dir.FullName + "\\TITLE.lst", FileMode.Create, FileAccess.Write);
+
 			// for 1-st block checksum
 			title_file.Write(new byte[] { 0, 0, 0, 0 }, 0, 4);
 			// SLJA_TITLE:1.3
@@ -412,21 +416,126 @@ namespace MultiTraConv
 			title_file.Write(Enumerable.Repeat<byte>(0, 7).ToArray(), 0, 7);
 			// 10 null bytes
 			title_file.Write(Enumerable.Repeat<byte>(0, 10).ToArray(), 0, 10);
-			// for titles block checksum
-			title_file.Write(new byte[] { 0, 0, 0, 0 }, 0, 4);
+			// data length start from 1b4 offset!!!
+			// 28 bytes head + 384 bytes disc title + num of tracks * 384 bytes
+			byte[] dl = BitConverter.GetBytes(28 + 384 + sc_files.Length * 384);
+			Array.Resize(ref dl, 4);
+			title_file.Write(dl, 0, 4);
 			// 396 null bytes
 			title_file.Write(Enumerable.Repeat<byte>(0, 396).ToArray(), 0, 396);
+
+			// HEAD
 			// for 12 bytes checksum and disk id
 			title_file.Write(Enumerable.Repeat<byte>(0, 8).ToArray(), 0, 8);
 			// count of tracks and ...cddb id???
-			title_file.Write(new byte[] { 0, 1, 0, 0, 0, 0, 0, 0 }, 0, 8);
+			byte count_files = Convert.ToByte(sc_files.Length);
+			title_file.Write(new byte[] { count_files, 1, 0, 0, 0, 0, 0, 0 }, 0, 8);
 			// for 12 bytes (checksum and ???)
 			title_file.Write(Enumerable.Repeat<byte>(0, 12).ToArray(), 0, 12);
+			// TITLES
+			//128 - name
+			//64 - name on japan
+			//128 - artist
+			//64 - artist on japan
 			// disc title (384 bytes)
-			title_file.Write(Enumerable.Repeat<byte>(0, 384).ToArray(), 0, 384);
+			byte[] dirname = string2bytes(dir.Name);
+			title_file.Write(dirname, 0, dirname.Length);
+			title_file.Write(Enumerable.Repeat<byte>(0, 64).ToArray(), 0, 64);
+			byte[] dirart = string2bytes("Various Artists");
+			title_file.Write(dirart, 0, dirart.Length);
+			title_file.Write(Enumerable.Repeat<byte>(0, 64).ToArray(), 0, 64);
 			// track titles (384 bytes x number of tracks)
+			foreach (FileInfo track in sc_files)
+			{
+				string[] ti = trackInfo(track);
+				byte[] name = string2bytes(ti[0]);
+				title_file.Write(name, 0, name.Length);
+				title_file.Write(Enumerable.Repeat<byte>(0, 64).ToArray(), 0, 64);
+				byte[] art = string2bytes(ti[1]);
+				title_file.Write(art, 0, art.Length);
+				title_file.Write(Enumerable.Repeat<byte>(0, 64).ToArray(), 0, 64);
+			}
 			title_file.Close();
 			Console.WriteLine("TITLE.lst for " + dir.Name + " created");
+		}
+
+		private byte[] string2bytes(string str)
+		{
+			byte[] strbytes = Encoding.GetEncoding(codePage).GetBytes(str);
+			// 128 bytes on string
+			byte[] lb = Enumerable.Repeat<byte>(0, 128).ToArray();
+			if (strbytes.Length > 128)
+			{
+				Array.Resize(ref strbytes, 128);
+			}
+			Array.Copy(strbytes, lb, strbytes.Length);
+			return lb;
+		}
+
+		private string[] trackInfo(FileInfo track)
+		{
+			//TagLib.File file = TagLib.File.Create(track.FullName);
+
+			Console.WriteLine("File: " + track.Name);
+			//Console.WriteLine("Artist: " + ((file.Tag.Performers.Length > 0) ? toUTF8(file.Tag.Performers[0]) : "Failed!!!"));
+			//Console.WriteLine("Title: " + toUTF8(file.Tag.Title));
+			//Console.WriteLine("Album: " + toUTF8(file.Tag.Album));
+
+			//string log_file = "d:\\id3vtest\\id3v.log";
+			//string log_unkfile = "d:\\id3vtest\\id3v_unk.log";
+			//this.progressBar.Minimum = 0;
+			//this.progressBar.Maximum = this.FilesTable.Items.Count;
+			//this.progressBar.Value = 0;
+			//this.progressBar.Step = 1;
+			//foreach (ListViewItem row in this.FilesTable.Items)
+			//{
+			string filename = track.FullName;
+				TagLib.File file = TagLib.File.Create(filename);
+				//filename.Replace("\n", "").Replace("\r", "");
+				string artist = (file.Tag.Performers.Length > 0) ? toUTF8(file.Tag.Performers[0]) : "Empty";
+				string title = (file.Tag.Title != null && file.Tag.Title.Length > 0) ? toUTF8(file.Tag.Title) : "";
+				Console.WriteLine("Artist: " + ((file.Tag.Performers.Length > 0) ? toUTF8(file.Tag.Performers[0]) : "Failed!!!"));
+				Console.WriteLine("Title: " + toUTF8(file.Tag.Title));
+			if (title.Length < 1)
+				{
+				//char delim = '\\';
+				//string[] parts = filename.Split(delim);
+				//title = parts[parts.Length - 1];
+					title = track.Name;
+					//title = toUTF8(title.Remove(title.Length - 4, 4));
+					title = toUTF8(title.Remove(title.Length - 3, 3));
+
+					if (title.Contains(" - "))
+					{
+						string[] tar = title.Split(new string[] { " - " }, 2, StringSplitOptions.RemoveEmptyEntries);
+						if (tar.Length == 2)
+						{
+							char[] t0 = tar[0].ToCharArray().Where((c) => !char.IsDigit(c)).ToArray();
+							char[] t1 = tar[1].ToCharArray().Where((c) => !char.IsDigit(c)).ToArray();
+							if (t0.Length > 1 && t1.Length > 0)
+							{
+								title = toUTF8(tar[0]);
+								artist = toUTF8(tar[1]);
+								Console.WriteLine("Artist2: " + artist);
+								Console.WriteLine("Title2: " + title);
+							//File.AppendAllText(log_unkfile, String.Format("{0,64}:{1,64}: ", toUTF8(tar[0]), toUTF8(tar[1])));
+							//File.AppendAllText(log_unkfile, toUTF8(filename) + "\n");
+							//this.progressBar.PerformStep();
+							//continue;
+						}
+						}
+					}
+				}
+				// in TITLE for title and artist - by 128 bytes!!!
+				// ё!!!
+				// delete start and end spaces!!!!
+				//string output = String.Format("{0,128}:{1,128}: ", title, artist);
+				//string output = String.Format("{0,64}:{1,64}: ", title, artist);
+				//File.AppendAllText(log_file, output);
+				//File.AppendAllText(log_file, filename + "\n");
+				//this.progressBar.PerformStep();
+			//}
+			return new string[] {title, artist};
 		}
 
 		// CHECK!!!!!!!
@@ -582,7 +691,7 @@ namespace MultiTraConv
 			//	File.AppendAllText(log_file, filename + "\n");
 			//	this.progressBar.PerformStep();
 			//}
-			//MessageBox.Show("Done");			
+			//MessageBox.Show("Done");
 		//}
 	}
 }
