@@ -38,7 +38,7 @@
 			this.omadir_button = new System.Windows.Forms.Button();
 			this.omadir_dialog = new System.Windows.Forms.FolderBrowserDialog();
 			this.FilesTable = new System.Windows.Forms.ListView();
-			this.filename = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+			this.fullfilename = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.filestatus = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
 			this.label3 = new System.Windows.Forms.Label();
 			this.progressBar = new System.Windows.Forms.ProgressBar();
@@ -117,7 +117,7 @@
 			// FilesTable
 			// 
 			this.FilesTable.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.filename,
+            this.fullfilename,
             this.filestatus});
 			this.FilesTable.GridLines = true;
 			this.FilesTable.Location = new System.Drawing.Point(15, 134);
@@ -129,8 +129,8 @@
 			// 
 			// filename
 			// 
-			this.filename.Text = "File";
-			this.filename.Width = 746;
+			this.fullfilename.Text = "File";
+			this.fullfilename.Width = 746;
 			// 
 			// filestatus
 			// 
@@ -268,7 +268,7 @@
         private System.Windows.Forms.Button omadir_button;
         private System.Windows.Forms.FolderBrowserDialog omadir_dialog;
         private System.Windows.Forms.ListView FilesTable;
-        private System.Windows.Forms.ColumnHeader filename;
+        private System.Windows.Forms.ColumnHeader fullfilename;
         private System.Windows.Forms.ColumnHeader filestatus;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.ProgressBar progressBar;

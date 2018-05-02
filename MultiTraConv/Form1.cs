@@ -42,7 +42,7 @@ namespace MultiTraConv
 		};
 
 		//Settings
-		public int max_async = 1;
+		public int max_async = 10;
 		//public int max_bitrate = 128;
 		public bool to_sc = true;
 		public bool NNNrename = false;
@@ -257,6 +257,7 @@ namespace MultiTraConv
 			//{
 			//	this.converted_dirs[dir.FullName] = new bool[] { true, true };
 			//}
+			Dictionary<string, string[]> titles = new Dictionary<string, string[]>();
 			foreach (FileInfo track in dir_tracks)
 			{
 				if (dir_tracks.Length > 99)
@@ -267,7 +268,7 @@ namespace MultiTraConv
 				NNN_cnt++;
 				//Console.WriteLine(track.Name + ": " + NNN_cnt);
 
-				string filename = track.FullName;
+				//string filename = track.FullName;
 				while (tasks >= max_async)
 				{
 					await Task.Delay(2000);
@@ -280,20 +281,32 @@ namespace MultiTraConv
 					//return;
 				}
 				tasks++;
-				ConvertFile(filename, NNN_cnt);
+				//ConvertFile(filename, NNN_cnt);
+				string NNN = String.Format("{0,3:D3}", NNN_cnt);
+				titles.Add(NNN + ".sc", trackInfo(track));
+				ConvertFile(track, NNN);
 				Application.DoEvents();
 			}
 
 			DirectoryInfo sc_dir = new DirectoryInfo(oma_path.Text + dir.FullName.Remove(0, mp3_path.TextLength));
-			while (Get_output_tracks_from_dir(sc_dir).Length != dir_tracks.Length)
+			while (!sc_dir.Exists || Get_output_tracks_from_dir(sc_dir).Length != dir_tracks.Length)
 			{
-				if (to_stop) { break; }
+				if (to_stop)
+				{
+					while (tasks > 0)
+					{
+						Console.WriteLine("TASKS: " + tasks);
+						await Task.Delay(2000);
+					}
+					break;
+				}
+				//Console.Write(".");
 				await Task.Delay(2000);
 				// what if stop pressed????
 			}
 			Console.WriteLine("dir " + dir.Name + " converted");
-			//CreateTitle(dir);
-			CreateTitle(sc_dir);
+			CreateTitle(sc_dir, titles);
+			//CreateTitle(sc_dir);
 
 			//if (debug)
 			//{
@@ -328,20 +341,26 @@ namespace MultiTraConv
 			}
 		}
 
-		private Task ConvertFile(string filename, int NNN_cnt)
+		//private Task ConvertFile(string filename, int NNN_cnt)
+		private Task ConvertFile(FileInfo track, string NNN_name)
 		{
 			var tcs = new TaskCompletionSource<bool>();
 
-			ListViewItem row = this.FilesTable.FindItemWithText(filename);
+			string fullfilename = track.FullName;
+			string filename = track.Name;
 
-			SetLVIText(filename, "converting...");
+			ListViewItem row = this.FilesTable.FindItemWithText(fullfilename);
 
-			string add_path = filename.Remove(0, mp3_path.TextLength);
-			add_path = add_path.Remove(add_path.Length - 3, 3);
-			string new_path_sc = oma_path.Text + add_path + NNN_cnt + ".sc";
+			SetLVIText(fullfilename, "converting...");
+
+			string add_path = fullfilename.Remove(0, mp3_path.TextLength);
+			//add_path = add_path.Remove(add_path.Length - 3, 3);
+			add_path = add_path.Remove(add_path.Length - filename.Length, filename.Length);
+			//string NNN = String.Format("{0,3:D3}", NNN_cnt);
+			string new_path_sc = oma_path.Text + add_path + NNN_name + ".sc";
 			if (File.Exists(new_path_sc))
 			{
-				SetLVIText(filename, "converted");
+				SetLVIText(fullfilename, "converted");
 				//this.progressBar.PerformStep();
 				SetPBStep();
 				//this.conv_count.Text = this.progressBar.Value.ToString();
@@ -351,7 +370,7 @@ namespace MultiTraConv
 				return tcs.Task;
 			}
 			string new_path_quoted = '"' + new_path_sc + '"';
-			string Arguments = '"' + filename + '"' + " --Convert --FileType OMAP --BitRate 128000 --Output " + new_path_quoted;
+			string Arguments = '"' + fullfilename + '"' + " --Convert --FileType OMAP --BitRate 128000 --Output " + new_path_quoted;
 
 			//Console.WriteLine(Arguments);
 			Process traconv = new Process();
@@ -367,17 +386,17 @@ namespace MultiTraConv
 				//Console.WriteLine("get result code: " + traconv.ExitCode);
 				//Console.WriteLine("get result out: " + p_out);
 				//if (!p_out.Contains("Location=" + new_path)) {
-				if (!p_out.Contains("TargetTrack=" + filename))
+				if (!p_out.Contains("TargetTrack=" + fullfilename))
 				{
 					//row.SubItems[1].Text = "Error: " + traconv.StartInfo.Arguments;
-					SetLVIText(filename, "Error: " + traconv.StartInfo.Arguments);
+					SetLVIText(fullfilename, "Error: " + traconv.StartInfo.Arguments);
 				}
 				else
 				{
 					//row.SubItems[1].Text = "converted";
-					SetLVIText(filename, "converted");
+					SetLVIText(fullfilename, "converted");
 					//if (to_sc) change_header(new_path, NNN);
-					change_header(new_path_sc, NNN_cnt);
+					//change_header(new_path_sc, NNN_cnt);
 					//Console.WriteLine("Convert OK");
 					//Console.WriteLine(item.Text + ": converted");
 					//if (this.converted_dirs[dir][0])
@@ -398,7 +417,7 @@ namespace MultiTraConv
 			return tcs.Task;
 		}
 
-		private void CreateTitle(DirectoryInfo dir)
+		private void CreateTitle(DirectoryInfo dir, Dictionary<string, string[]> titles)
 		{
 			// if dir is mp3 dir - IF STOP PRESSED COUNT OF mp3 FILES != COUNT OF sc FILES!!!!
 
@@ -421,7 +440,7 @@ namespace MultiTraConv
 			byte[] dl = BitConverter.GetBytes(28 + 384 + sc_files.Length * 384);
 			Array.Resize(ref dl, 4);
 			title_file.Write(dl, 0, 4);
-			// 396 null bytes
+			// 396 null bytes (99 disks titles * 4 bytes)
 			title_file.Write(Enumerable.Repeat<byte>(0, 396).ToArray(), 0, 396);
 
 			// HEAD
@@ -447,11 +466,11 @@ namespace MultiTraConv
 			// track titles (384 bytes x number of tracks)
 			foreach (FileInfo track in sc_files)
 			{
-				string[] ti = trackInfo(track);
-				byte[] name = string2bytes(ti[0]);
+				//string[] ti = trackInfo(track);
+				byte[] name = (titles.ContainsKey(track.Name)) ? string2bytes(titles[track.Name][0]) : string2bytes(track.Name.Remove(track.Name.Length - 3, 3));
 				title_file.Write(name, 0, name.Length);
 				title_file.Write(Enumerable.Repeat<byte>(0, 64).ToArray(), 0, 64);
-				byte[] art = string2bytes(ti[1]);
+				byte[] art = (titles.ContainsKey(track.Name)) ? string2bytes(titles[track.Name][1]) : string2bytes("");
 				title_file.Write(art, 0, art.Length);
 				title_file.Write(Enumerable.Repeat<byte>(0, 64).ToArray(), 0, 64);
 			}
@@ -492,7 +511,7 @@ namespace MultiTraConv
 			string filename = track.FullName;
 				TagLib.File file = TagLib.File.Create(filename);
 				//filename.Replace("\n", "").Replace("\r", "");
-				string artist = (file.Tag.Performers.Length > 0) ? toUTF8(file.Tag.Performers[0]) : "Empty";
+				string artist = (file.Tag.Performers.Length > 0) ? toUTF8(file.Tag.Performers[0]) : "";
 				string title = (file.Tag.Title != null && file.Tag.Title.Length > 0) ? toUTF8(file.Tag.Title) : "";
 				Console.WriteLine("Artist: " + ((file.Tag.Performers.Length > 0) ? toUTF8(file.Tag.Performers[0]) : "Failed!!!"));
 				Console.WriteLine("Title: " + toUTF8(file.Tag.Title));
@@ -502,10 +521,10 @@ namespace MultiTraConv
 				//string[] parts = filename.Split(delim);
 				//title = parts[parts.Length - 1];
 					title = track.Name;
-					//title = toUTF8(title.Remove(title.Length - 4, 4));
-					title = toUTF8(title.Remove(title.Length - 3, 3));
+				title = toUTF8(title.Remove(title.Length - 4, 4));
+				//title = toUTF8(title.Remove(title.Length - 3, 3));
 
-					if (title.Contains(" - "))
+				if (title.Contains(" - "))
 					{
 						string[] tar = title.Split(new string[] { " - " }, 2, StringSplitOptions.RemoveEmptyEntries);
 						if (tar.Length == 2)
@@ -549,13 +568,13 @@ namespace MultiTraConv
 			string omaf = omas[omas.Length - 1].Remove(omas[omas.Length - 1].Length - 3, 3);
 
 			// NNN - random!!!
-			if (NNNrename)
-            {
-                string NNNst = (NNN.ToString().Length >= 3) ? NNN.ToString() : ((NNN.ToString().Length == 2) ? "0" + NNN.ToString() : "00" + NNN.ToString());
-                string[] NNNsc = sc_file.Split('\\');
-				NNNsc.SetValue(NNNst + ".sc", NNNsc.Length - 1);
-				sc_file = String.Join("\\", NNNsc);
-            }
+			//if (NNNrename)
+   //         {
+   //             string NNNst = (NNN.ToString().Length >= 3) ? NNN.ToString() : ((NNN.ToString().Length == 2) ? "0" + NNN.ToString() : "00" + NNN.ToString());
+   //             string[] NNNsc = sc_file.Split('\\');
+			//	NNNsc.SetValue(NNNst + ".sc", NNNsc.Length - 1);
+			//	sc_file = String.Join("\\", NNNsc);
+   //         }
             
             FileStream in_file = new FileStream(oma_file, FileMode.Open, FileAccess.Read);
             FileStream out_file = new FileStream(sc_file, FileMode.Create, FileAccess.Write);
