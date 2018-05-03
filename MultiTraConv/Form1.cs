@@ -226,12 +226,14 @@ namespace MultiTraConv
 				//}
 				while (tasks >= max_async)
 				{
+					Console.WriteLine("ConvertDirs: max tasks - wait");
 					await Task.Delay(2000);
 					//Thread.Sleep(2000);
 				}
 				if (to_stop)
 				{
 					//to_stop = false;
+					Console.WriteLine("ConvertDirs: stop - return");
 					return;
 				}
 				ConvertDirs(subdir);
@@ -266,17 +268,20 @@ namespace MultiTraConv
 					continue;
 				}
 				NNN_cnt++;
+				Console.WriteLine("ConvertDir: file - " + track.Name + " -> " + NNN_cnt);
 				//Console.WriteLine(track.Name + ": " + NNN_cnt);
 
 				//string filename = track.FullName;
 				while (tasks >= max_async)
 				{
+					Console.WriteLine("ConvertDir: max tasks - wait");
 					await Task.Delay(2000);
 					//Thread.Sleep(2000);
 				}
 				if (to_stop)
 				{
 					//to_stop = false;
+					Console.WriteLine("ConvertDir: stop - break");
 					break;
 					//return;
 				}
@@ -291,10 +296,12 @@ namespace MultiTraConv
 			DirectoryInfo sc_dir = new DirectoryInfo(oma_path.Text + dir.FullName.Remove(0, mp3_path.TextLength));
 			while (!sc_dir.Exists || Get_output_tracks_from_dir(sc_dir).Length != dir_tracks.Length)
 			{
+				Console.WriteLine("ConvertDir: dir converted - wait tracks");
 				if (to_stop)
 				{
 					while (tasks > 0)
 					{
+						Console.WriteLine("ConvertDir: stop - wait tracks");
 						Console.WriteLine("TASKS: " + tasks);
 						await Task.Delay(2000);
 					}
@@ -304,7 +311,8 @@ namespace MultiTraConv
 				await Task.Delay(2000);
 				// what if stop pressed????
 			}
-			Console.WriteLine("dir " + dir.Name + " converted");
+			//Console.WriteLine(/*"dir " + dir.Name + " converted"*/);
+			Console.WriteLine("ConvertDir: dir " + dir.Name + " converted");
 			CreateTitle(sc_dir, titles);
 			//CreateTitle(sc_dir);
 
@@ -346,6 +354,7 @@ namespace MultiTraConv
 		{
 			var tcs = new TaskCompletionSource<bool>();
 
+			//Console.WriteLine("ConvertFile: file - " + track.Name + " -> " + NNN_name);
 			string fullfilename = track.FullName;
 			string filename = track.Name;
 
@@ -372,7 +381,7 @@ namespace MultiTraConv
 			string new_path_quoted = '"' + new_path_sc + '"';
 			string Arguments = '"' + fullfilename + '"' + " --Convert --FileType OMAP --BitRate 128000 --Output " + new_path_quoted;
 
-			//Console.WriteLine(Arguments);
+			Console.WriteLine(Arguments);
 			Process traconv = new Process();
 			startInfo.Arguments = Arguments;
 			traconv.EnableRaisingEvents = true;
@@ -464,6 +473,13 @@ namespace MultiTraConv
 			title_file.Write(dirart, 0, dirart.Length);
 			title_file.Write(Enumerable.Repeat<byte>(0, 64).ToArray(), 0, 64);
 			// track titles (384 bytes x number of tracks)
+
+			// WARNING!!!
+			// при одновременной конвертации одинаковых файлов (именно по музыке, не по ID3v тегу) 
+			// через TraConv файлы могут НЕ сконвертироваться!
+			// поэтому можем получить пропуски в списке файлов .sc: 013.sc, 014.sc, 015.sc, 018.sc, 019.sc!
+			// пропуски повлияют на порядок файлов в TITLE.lst!
+			// попробуем заполнить описание пропущенных файлов нулями
 			foreach (FileInfo track in sc_files)
 			{
 				//string[] ti = trackInfo(track);
@@ -495,7 +511,7 @@ namespace MultiTraConv
 		{
 			//TagLib.File file = TagLib.File.Create(track.FullName);
 
-			Console.WriteLine("File: " + track.Name);
+			//Console.WriteLine("File: " + track.Name);
 			//Console.WriteLine("Artist: " + ((file.Tag.Performers.Length > 0) ? toUTF8(file.Tag.Performers[0]) : "Failed!!!"));
 			//Console.WriteLine("Title: " + toUTF8(file.Tag.Title));
 			//Console.WriteLine("Album: " + toUTF8(file.Tag.Album));
@@ -513,8 +529,8 @@ namespace MultiTraConv
 				//filename.Replace("\n", "").Replace("\r", "");
 				string artist = (file.Tag.Performers.Length > 0) ? toUTF8(file.Tag.Performers[0]) : "";
 				string title = (file.Tag.Title != null && file.Tag.Title.Length > 0) ? toUTF8(file.Tag.Title) : "";
-				Console.WriteLine("Artist: " + ((file.Tag.Performers.Length > 0) ? toUTF8(file.Tag.Performers[0]) : "Failed!!!"));
-				Console.WriteLine("Title: " + toUTF8(file.Tag.Title));
+				//Console.WriteLine("Artist: " + ((file.Tag.Performers.Length > 0) ? toUTF8(file.Tag.Performers[0]) : "Failed!!!"));
+				//Console.WriteLine("Title: " + toUTF8(file.Tag.Title));
 			if (title.Length < 1)
 				{
 				//char delim = '\\';
@@ -535,8 +551,8 @@ namespace MultiTraConv
 							{
 								title = toUTF8(tar[0]);
 								artist = toUTF8(tar[1]);
-								Console.WriteLine("Artist2: " + artist);
-								Console.WriteLine("Title2: " + title);
+								//Console.WriteLine("Artist2: " + artist);
+								//Console.WriteLine("Title2: " + title);
 							//File.AppendAllText(log_unkfile, String.Format("{0,64}:{1,64}: ", toUTF8(tar[0]), toUTF8(tar[1])));
 							//File.AppendAllText(log_unkfile, toUTF8(filename) + "\n");
 							//this.progressBar.PerformStep();
