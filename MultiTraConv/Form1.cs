@@ -16,12 +16,13 @@ namespace MultiTraConv
 		private Int32 _start_form_height = 547;
 		private Int32 _start_table_height = 363;
 		private bool to_stop = false;
-		private FileStream log;
+		//private FileStream log;
 		private string traconv_path = Path.GetDirectoryName(Application.ExecutablePath) + "\\TraConv.exe";
 		private ProcessStartInfo startInfo;
 		private DirectoryInfo root_dir;
 		private Dictionary<string, bool[]> converted_dirs = new Dictionary<string, bool[]>();
 		private Dictionary<string, int> dirtasks = new Dictionary<string, int>();
+		private Dictionary<string, int> dirtrackdone = new Dictionary<string, int>();
 
 		private string codePage = "iso-8859-5";
 
@@ -42,7 +43,7 @@ namespace MultiTraConv
 		};
 
 		//Settings
-		public int max_async = 10;
+		public int max_async = 3;
 		public bool to_sc = true;
 		public bool NNNrename = false;
 		//public bool debug = false;
@@ -56,18 +57,18 @@ namespace MultiTraConv
 
 			this.MaximumSize = new Size(986, 800);
 			this.SizeChanged += new EventHandler(this.MultiTraConv_SizeChanged);
+			this.user_max_async.Value = max_async;
 			this.progressBar.Minimum = 0;
 			this.progressBar.Value = 0;
 			this.progressBar.Step = 1;
 
 			// test
-			//this.mp3_path.Text = "D:\\id3vtest\\!test_convert_dir";
-			//this.mp3_path.Text = "D:\\id3vtest\\!! музыка";
-			//this.oma_path.Text = "D:\\id3vtest\\!! музыкаoma";
-			this.root_dir = new DirectoryInfo(this.mp3_path.Text);
-			this.progressBar.Maximum = 0;
-			this.FilesTable.Items.Clear();
-			fill_files_table(this.root_dir);
+			//this.mp3_path.Text = "<fullpath>";
+			//this.oma_path.Text = "<fullpath>";
+			//this.root_dir = new DirectoryInfo(this.mp3_path.Text);
+			//this.progressBar.Maximum = 0;
+			//this.FilesTable.Items.Clear();
+			//fill_files_table(this.root_dir);
 		}
 
 		private void MultiTraConv_SizeChanged(Object sender, EventArgs e)
@@ -150,7 +151,6 @@ namespace MultiTraConv
 				this.progressBar.Value = 0;
 
 				this.start_convert.Enabled = false;
-				this.button_Settings.Enabled = false;
 				this.stop_convert.Enabled = true;
 
 				//if (debug)
@@ -170,10 +170,19 @@ namespace MultiTraConv
 				startInfo.RedirectStandardOutput = true;
 
 				ConvertDirs(this.root_dir);
-				to_stop = false;
-				this.start_convert.Enabled = true;
-				this.button_Settings.Enabled = true;
+				ConvertDone();
 			}
+		}
+
+		private async void ConvertDone()
+		{
+			while (dirtrackdone.Sum(dt => dt.Value) > 0)
+			{
+				await Task.Delay(2000);
+			}
+			to_stop = false;
+			this.start_convert.Enabled = true;
+			MessageBox.Show("DONE!");
 		}
 
 		private async void ConvertDirs(DirectoryInfo dir)
@@ -200,10 +209,13 @@ namespace MultiTraConv
 			int NNN_cnt = 0;
 			//Console.WriteLine("dir #" + dir.Name + "# converting...");
 			FileInfo[] dir_tracks = Get_input_tracks_from_dir(dir);
+			if (dir_tracks.Length == 0)
+			{
+				//Console.WriteLine("dir empty");
+				return;
+			}
 			DirectoryInfo sc_dir = new DirectoryInfo(oma_path.Text + dir.FullName.Remove(0, mp3_path.TextLength));
 			Dictionary<string, string[]> titles = new Dictionary<string, string[]>();
-			//Dictionary<string, string[]> track_titles = new Dictionary<string, string[]>();
-			//Dictionary<string, Dictionary<string, string[]>> dir_titles = new Dictionary<string, Dictionary<string, string[]>>();
 			string add_path = null;
 			foreach (FileInfo track in dir_tracks)
 			{
@@ -232,16 +244,21 @@ namespace MultiTraConv
 				}
 				if (dirtasks.ContainsKey(add_path))	{
 					dirtasks[add_path]++;
+					dirtrackdone[add_path]++;
 				} else {
 					dirtasks.Add(add_path, 1);
+					dirtrackdone.Add(add_path, 1);
 				}
 
 				string NNN = String.Format("{0,3:D3}", NNN_cnt);
 				titles.Add(NNN + ".sc", trackInfo(track));
-				//track_titles.Add(NNN + ".sc", trackInfo(track));
-				//dir_titles.Add(sc_dir.Name, track_titles);
 				ConvertFile(track, NNN);
 				Application.DoEvents();
+			}
+
+			if (dir_tracks.Length > 99)
+			{
+				return;
 			}
 
 			// WARNING!!!
@@ -267,8 +284,6 @@ namespace MultiTraConv
 			}
 			//Console.WriteLine("ConvertDir: dir " + dir.Name + " converted");
 			CreateTitle(sc_dir, titles);
-			//CreateTitle(sc_dir, dir_titles);
-			//track_titles.Clear(); dir_titles[sc_dir.Name].Clear();
 		}
 
 		private void SetLVIText(string filename, string text)
@@ -316,7 +331,7 @@ namespace MultiTraConv
 			if (File.Exists(new_path_sc))
 			{
 				SetLVIText(fullfilename, "converted");
-				SetPBStep();
+				//SetPBStep();
 				tcs.SetResult(true);
 				dirtasks[add_path]--;
 				return tcs.Task;
@@ -339,7 +354,7 @@ namespace MultiTraConv
 				else
 				{
 					SetLVIText(fullfilename, "converted");
-					SetPBStep();
+					//SetPBStep();
 				}
 				traconv.Dispose();
 				dirtasks[add_path]--;
@@ -434,6 +449,7 @@ namespace MultiTraConv
 				cur_file_num = (trackNum > cur_file_num) ? trackNum + 1 : cur_file_num + 1;
 			}
 			title_file.Close();
+			change_header(sc_files);
 			//Console.WriteLine("TITLE.lst for " + dir.Name + " created");
 		}
 
@@ -478,75 +494,74 @@ namespace MultiTraConv
 			return new string[] {title, artist};
 		}
 
-		// CHECK!!!!!!!
-		private void change_header(string oma_file, int NNN)
+		private void change_header(FileInfo[] sc_files)
 		{
-			string sc_file = oma_file;
+			//Console.WriteLine("change_header: dir " + sc_files[0].DirectoryName + " start");
 
-			string[] omas = oma_file.Split('\\');
-			string omaf = omas[omas.Length - 1].Remove(omas[omas.Length - 1].Length - 3, 3);
+			string add_path = sc_files[0].FullName.Remove(0, oma_path.TextLength);
+			add_path = add_path.Remove(add_path.Length - sc_files[0].Name.Length, sc_files[0].Name.Length);
+			foreach (FileInfo track in sc_files)
+			{
+				FileStream in_file = new FileStream(track.FullName, FileMode.Open, FileAccess.Read);
+				FileStream out_file = new FileStream(track.FullName + ".mmcs", FileMode.Create, FileAccess.Write);
 
-			FileStream in_file = new FileStream(oma_file, FileMode.Open, FileAccess.Read);
-			FileStream out_file = new FileStream(sc_file, FileMode.Create, FileAccess.Write);
+				//OMA files
+				//These are the actual MP3 files. The file starts with a tag "ea3";
+				//replacing the "ea" with "ID" turns this into an ID3 block, complete
+				//with size tag, which can be read with a standard ID3 library.So far
+				//all sample files have had 3072 bytes of ID3 data on the device,
+				//regardless of the amount in the input files.After the ID3 tag there
+				//is a second block starting with either "ea3" or "EA3"(not sure why
+				//there's a case difference, nor whether it changes between
+				//versions).The next byte, 0x02, is probably part of this
+				//signature.The next 16 - bit word is the size of the header including
+				//the 4 - byte signature.Immediately after the header is the mp3 data
 
-			//OMA files
-			//These are the actual MP3 files. The file starts with a tag "ea3";
-			//replacing the "ea" with "ID" turns this into an ID3 block, complete
-			//with size tag, which can be read with a standard ID3 library.So far
-			//all sample files have had 3072 bytes of ID3 data on the device,
-			//regardless of the amount in the input files.After the ID3 tag there
-			//is a second block starting with either "ea3" or "EA3"(not sure why
-			//there's a case difference, nor whether it changes between
-			//versions).The next byte, 0x02, is probably part of this
-			//signature.The next 16 - bit word is the size of the header including
-			//the 4 - byte signature.Immediately after the header is the mp3 data
+				byte[] ID3_head = new byte[10];
+				byte[] ea3_size = new byte[2];
 
-			byte[] ID3_head = new byte[10];
-			byte[] ea3_size = new byte[2];
+				in_file.Read(ID3_head, 0, ID3_head.Length);
+				////http://www.developerfusion.com/code/4684/read-mp3-tag-information-id3v1-and-id3v2/
+				int[] bytes = new int[4];      // for bit shifting
+				bytes[3] = ID3_head[9] | ((ID3_head[8] & 1) << 7);
+				bytes[2] = ((ID3_head[8] >> 1) & 63) | ((ID3_head[7] & 3) << 6);
+				bytes[1] = ((ID3_head[7] >> 2) & 31) | ((ID3_head[6] & 7) << 5);
+				bytes[0] = ((ID3_head[6] >> 3) & 15);
 
-			in_file.Read(ID3_head, 0, ID3_head.Length);
-			////http://www.developerfusion.com/code/4684/read-mp3-tag-information-id3v1-and-id3v2/
-			int[] bytes = new int[4];      // for bit shifting
-			bytes[3] = ID3_head[9] | ((ID3_head[8] & 1) << 7);
-			bytes[2] = ((ID3_head[8] >> 1) & 63) | ((ID3_head[7] & 3) << 6);
-			bytes[1] = ((ID3_head[7] >> 2) & 31) | ((ID3_head[6] & 7) << 5);
-			bytes[0] = ((ID3_head[6] >> 3) & 15);
+				ulong ID3Size = ((UInt64)10 + (UInt64)bytes[3] |
+					((UInt64)bytes[2] << 8) |
+					((UInt64)bytes[1] << 16) |
+					((UInt64)bytes[0] << 24));
 
-			ulong ID3Size = ((UInt64)10 + (UInt64)bytes[3] |
-				((UInt64)bytes[2] << 8) |
-				((UInt64)bytes[1] << 16) |
-				((UInt64)bytes[0] << 24));
+				// 0x100 - ???
+				// 4 - second ea3 header tag
+				int ea3_offset = (int)(ID3Size + 0x100 + 4);
+				in_file.Position = ea3_offset;
 
-			// 0x100 - ???
-			// 4 - second ea3 header tag
-			int ea3_offset = (int)(ID3Size + 0x100 + 4);
-			in_file.Position = ea3_offset;
+				// 2 bytes - second ea3 header length
+				in_file.Read(ea3_size, 0, ea3_size.Length);
 
-			// 2 bytes - second ea3 header length
-			in_file.Read(ea3_size, 0, ea3_size.Length);
+				Array.Reverse(ea3_size);
+				int ea3Size = BitConverter.ToInt16(ea3_size, 0);
+				in_file.Position = ea3_offset + ea3Size - 4;
 
-			Array.Reverse(ea3_size);
-			int ea3Size = BitConverter.ToInt16(ea3_size, 0);
-			in_file.Position = ea3_offset + ea3Size - 4;
+				out_file.Write(sc_header, 0, sc_header.Length);
+				in_file.CopyTo(out_file);
 
-			out_file.Write(sc_header, 0, sc_header.Length);
-			in_file.CopyTo(out_file);
-
-			in_file.Close();
-			out_file.Close();
-			File.Delete(oma_file);
+				in_file.Close();
+				out_file.Close();
+				string old_name = track.FullName;
+				File.Delete(track.FullName);
+				File.Move(out_file.Name, old_name);
+				SetPBStep();
+				dirtrackdone[add_path]--;
+			}
 		}
 
 		private void stop_convert_Click(object sender, EventArgs e)
         {
             to_stop = true;
 		}
-
-        private void button_Settings_Click(object sender, EventArgs e)
-        {
-            SettingsPage sp = new SettingsPage(this);
-            sp.ShowDialog();
-        }
 
         private void Help_button_Click(object sender, EventArgs e)
         {
@@ -563,5 +578,9 @@ namespace MultiTraConv
 			);
 		}
 
+		private void user_max_async_ValueChanged(object sender, EventArgs e)
+		{
+			max_async = Decimal.ToInt32(this.user_max_async.Value);
+		}
 	}
 }

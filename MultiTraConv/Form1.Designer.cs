@@ -47,8 +47,10 @@
 			this.conv_count = new System.Windows.Forms.Label();
 			this.start_convert = new System.Windows.Forms.Button();
 			this.stop_convert = new System.Windows.Forms.Button();
-			this.button_Settings = new System.Windows.Forms.Button();
 			this.Help_button = new System.Windows.Forms.Button();
+			this.user_max_async = new System.Windows.Forms.NumericUpDown();
+			this.label5 = new System.Windows.Forms.Label();
+			((System.ComponentModel.ISupportInitialize)(this.user_max_async)).BeginInit();
 			this.SuspendLayout();
 			// 
 			// mp3dir_dialog
@@ -127,7 +129,7 @@
 			this.FilesTable.UseCompatibleStateImageBehavior = false;
 			this.FilesTable.View = System.Windows.Forms.View.Details;
 			// 
-			// filename
+			// fullfilename
 			// 
 			this.fullfilename.Text = "File";
 			this.fullfilename.Width = 746;
@@ -183,7 +185,7 @@
 			// 
 			// start_convert
 			// 
-			this.start_convert.Location = new System.Drawing.Point(781, 75);
+			this.start_convert.Location = new System.Drawing.Point(751, 75);
 			this.start_convert.Name = "start_convert";
 			this.start_convert.Size = new System.Drawing.Size(117, 32);
 			this.start_convert.TabIndex = 12;
@@ -193,37 +195,44 @@
 			// 
 			// stop_convert
 			// 
-			this.stop_convert.BackColor = System.Drawing.SystemColors.AppWorkspace;
+			this.stop_convert.BackColor = System.Drawing.SystemColors.Control;
 			this.stop_convert.Enabled = false;
 			this.stop_convert.FlatAppearance.BorderColor = System.Drawing.Color.Red;
 			this.stop_convert.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
-			this.stop_convert.Location = new System.Drawing.Point(904, 75);
+			this.stop_convert.Location = new System.Drawing.Point(884, 75);
 			this.stop_convert.Name = "stop_convert";
-			this.stop_convert.Size = new System.Drawing.Size(46, 32);
+			this.stop_convert.Size = new System.Drawing.Size(66, 32);
 			this.stop_convert.TabIndex = 15;
-			this.stop_convert.Text = "Stop";
-			this.stop_convert.UseVisualStyleBackColor = false;
+			this.stop_convert.Text = "STOP";
+			this.stop_convert.UseVisualStyleBackColor = true;
 			this.stop_convert.Click += new System.EventHandler(this.stop_convert_Click);
-			// 
-			// button_Settings
-			// 
-			this.button_Settings.Location = new System.Drawing.Point(15, 75);
-			this.button_Settings.Name = "button_Settings";
-			this.button_Settings.Size = new System.Drawing.Size(54, 32);
-			this.button_Settings.TabIndex = 16;
-			this.button_Settings.Text = "Settings";
-			this.button_Settings.UseVisualStyleBackColor = true;
-			this.button_Settings.Click += new System.EventHandler(this.button_Settings_Click);
 			// 
 			// Help_button
 			// 
-			this.Help_button.Location = new System.Drawing.Point(75, 75);
+			this.Help_button.Location = new System.Drawing.Point(690, 75);
 			this.Help_button.Name = "Help_button";
-			this.Help_button.Size = new System.Drawing.Size(23, 32);
+			this.Help_button.Size = new System.Drawing.Size(39, 32);
 			this.Help_button.TabIndex = 17;
-			this.Help_button.Text = "?";
+			this.Help_button.Text = "Help";
 			this.Help_button.UseVisualStyleBackColor = true;
 			this.Help_button.Click += new System.EventHandler(this.Help_button_Click);
+			// 
+			// user_max_async
+			// 
+			this.user_max_async.Location = new System.Drawing.Point(141, 83);
+			this.user_max_async.Name = "user_max_async";
+			this.user_max_async.Size = new System.Drawing.Size(120, 20);
+			this.user_max_async.TabIndex = 19;
+			this.user_max_async.ValueChanged += new System.EventHandler(this.user_max_async_ValueChanged);
+			// 
+			// label5
+			// 
+			this.label5.AutoSize = true;
+			this.label5.Location = new System.Drawing.Point(12, 85);
+			this.label5.Name = "label5";
+			this.label5.Size = new System.Drawing.Size(78, 13);
+			this.label5.TabIndex = 18;
+			this.label5.Text = "Max processes";
 			// 
 			// MultiTraConv
 			// 
@@ -231,8 +240,9 @@
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.AutoScroll = true;
 			this.ClientSize = new System.Drawing.Size(970, 509);
+			this.Controls.Add(this.user_max_async);
+			this.Controls.Add(this.label5);
 			this.Controls.Add(this.Help_button);
-			this.Controls.Add(this.button_Settings);
 			this.Controls.Add(this.stop_convert);
 			this.Controls.Add(this.start_convert);
 			this.Controls.Add(this.conv_count);
@@ -251,7 +261,8 @@
 			this.MinimumSize = new System.Drawing.Size(986, 547);
 			this.Name = "MultiTraConv";
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-			this.Text = "MMCS MultiTraConv";
+			this.Text = "MMCS Music Server Converter";
+			((System.ComponentModel.ISupportInitialize)(this.user_max_async)).EndInit();
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
@@ -277,8 +288,9 @@
         private System.Windows.Forms.Label conv_count;
         private System.Windows.Forms.Button start_convert;
         private System.Windows.Forms.Button stop_convert;
-        private System.Windows.Forms.Button button_Settings;
         private System.Windows.Forms.Button Help_button;
+		private System.Windows.Forms.NumericUpDown user_max_async;
+		private System.Windows.Forms.Label label5;
 	}
 }
 
