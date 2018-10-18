@@ -161,6 +161,8 @@ namespace MultiTraConv
 				if (!File.Exists(traconv_path))
 				{
 					MessageBox.Show("Can`t find " + traconv_path + "!");
+					this.start_convert.Enabled = true;
+					this.stop_convert.Enabled = false;
 					return;
 				}
 
@@ -182,6 +184,7 @@ namespace MultiTraConv
 			}
 			to_stop = false;
 			this.start_convert.Enabled = true;
+			this.stop_convert.Enabled = false;
 			MessageBox.Show("DONE!");
 		}
 
