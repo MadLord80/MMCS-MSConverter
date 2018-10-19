@@ -1,34 +1,31 @@
-# MMCS MultiTraConv
-MP3/WAV to ATRAC3plus (WAV) multi converter (for MMCS Music Server)
+# MMCS MSConverter
+MP3/WAV to ATRAC3plus multi converter (for MMCS Music Server)
 
-Program for converting mp3 and wav music files to ATRAC3Plus (WAV) format, supported by MMCS.
+Program for converting mp3 and wav music files to ATRAC3Plus format, supported by MMCS.
 To convert files to the standard ATRAC3Plus format, the program uses the TraConv.exe console utility
-(http://www.vector.co.jp/soft/winnt/art/se492660.html, https://github.com/MadLord80/MultiTraConv/blob/master/TraConv.exe). This utility must be in the same directory where MMCS MultiTraConv. 
+(http://www.vector.co.jp/soft/winnt/art/se492660.html, https://github.com/MadLord80/MMCS-MSConverter/blob/master/TraConv.exe). This utility must be in the same directory where MMCS MSConverter. 
 
 To use the TraConv.exe console utility, you need to install the Sony OpenMG package (Sony Media Library Earth - 
-https://github.com/MadLord80/MultiTraConv/blob/master/OpenMG.rar).
+https://github.com/MadLord80/MMCS-MSConverter/blob/master/OpenMG.rar).
 
-Download - https://github.com/MadLord80/MultiTraConv/tree/master/MultiTraConv/bin/Debug
+Download - https://github.com/MadLord80/MMCS-MSConverter/tree/master/MultiTraConv/bin/Debug
 
-MadLord, 2017 (madlord.info)
+MadLord, 2018 (madlord.info)
 
-Input directory (mp3, wav) - path to the directory with mp3 and/or wav files. The directory can contain any nested directories, the main thing - the presence of files with the extension mp3 and/or wav.
+Input directory (mp3, wav) - path to the directory with mp3 and/or wav files. The directory can contain any nested directories, the main thing - the presence of files with the extension mp3 and/or wav. Also, each directory must not contain more than 99 files (MMCS limit)!
 
-Output directory (oma, sc) - the path to the directory where you want to save the converted files. Files will be created with the same paths. Change only the extension to *.sc (or *.oma).  
+Output directory (sc) - the path to the directory where you want to save the converted files. Files will be created with the same paths as the original. Files name and extension will change (new extension - *.sc). The name will change to the MMCS format, i.e. NNN - the sequence number of the original file in the corresponding directory.
 For example:  
 Input directory - d:\music  
-File - d:\music\b2\my rock-n-roll.mp3  
+First file - d:\music\b2\my rock-n-roll.mp3  
 Output directory - d:\sc  
-The full path to the converted file will be d:\sc\b2\my rock-n-roll.sc
+The full path to the converted file will be d:\sc\b2\001.sc
 
-Max processes - MMCS MultiTraConv can convert several files at the same time, but system resources are wasted on this, so there is a limit to not strongly strain the computer. By default, 1.
+Also in each directory the program will create a TITLE.lst file - it stores descriptions of files in the MMCS format and will be required later for the MMCS Music Server Editor (MSE) program for correct import of files.
+
+Max processes - MMCS MSConverter can convert several files at the same time, but system resources are wasted on this, so there is a limit to not strongly strain the computer. By default, 3.
 You can increase the value if you think it's necessary.
 
-Max bitrate (kb/s) - the bitrate of the converted files. Because did not check the work on MMCS files with a bitrate other than 128 kb/s, then there is no way to change it.
+Button "Convert" - starts the conversion.
+Button "STOP" - stops the conversion. But since if the conversion processes are already running, the program will stop the process when they run out, and not immediately.
 
-Convert to *.sc - Convert the files directly to the MMCS Music Server format. If the item is not selected, the files will be converted to the standard format ATRAC3plus (*.oma)
-
-Rename to NNN.sc - if the item is selected, when converting to the MMCS Music Server format, the files in each directory will be renamed in MMCS style (ie 001.sc, 002.sc, etc.).
-
-Enable log - write the conversion results to a log file. The name of the log file can be set in the Log-file name parameter.  
-The file is created in the same directory as MMCS MultiTraConv.
