@@ -1,12 +1,13 @@
-MMCS MSConverter
+# MMCS MSConverter
 
 Программа для конвертации музыкальных файлов mp3 и wav в формат ATRAC3Plus, поддерживаемый MMCS.
 Для конвертации файлов в стандартный формат ATRAC3Plus программа использует консольную утилиту TraConv.exe
-(http://www.vector.co.jp/soft/winnt/art/se492660.html). Утилита должна находиться в том же каталоге, где и MMCS MSConverter.
-Для работы консольной утилиты TraConv.exe необходимо установить пакет Sony OpenMG (Sony Media Library Earth - 
-https://cloud.mail.ru/public/J14i/z8BzvDGqE).
+(http://www.vector.co.jp/soft/winnt/art/se492660.html, https://github.com/MadLord80/MMCS-MSConverter/blob/master/TraConv.exe). Утилита должна находиться в том же каталоге, где и MMCS MSConverter.
 
-MadLord, 2017 (madlord.info, https://github.com/MadLord80/MMCS-MSConverter)
+Для работы консольной утилиты TraConv.exe необходимо установить пакет Sony OpenMG (Sony Media Library Earth - 
+https://github.com/MadLord80/MMCS-MSConverter/blob/master/OpenMG.rar).
+
+MadLord, 2018 (madlord.info)
 
 Input directory (mp3, wav) - путь к каталогу с mp3 и/или wav файлами. Каталог может содержать любые вложенные 
 каталоги, главное - наличие файлов с расширением *.mp3 и/или wav. Также каждый каталог не должен содержать
