@@ -1,5 +1,9 @@
 # MMCS MSConverter
 MP3/WAV to ATRAC3plus multi converter (for MMCS Music Server)
+<p align="center">
+  <span>English</span> |
+  <a href="https://github.com/MadLord80/MMCS-MSConverter/blob/master/README.ru.md">Pусский</a>
+</p>
 
 Program for converting mp3 and wav music files to ATRAC3Plus format, supported by MMCS.
 To convert files to the standard ATRAC3Plus format, the program uses the TraConv.exe console utility
