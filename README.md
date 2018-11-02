@@ -25,6 +25,8 @@ First file - d:\music\b2\my rock-n-roll.mp3
 Output directory - d:\sc  
 The full path to the converted file will be d:\sc\b2\001.sc
 
+> WARNING!!! When converting identical files at the same time (namely, by music data, not by ID3v tag or file name) files can NOT be converted via TraConv! Therefore, we can get gaps in the list of .sc files: 013.sc, 014.sc, 015.sc, 018.sc, 019.sc! And the number of * .sc files will be less than the original number of files.
+
 Also in each directory the program will create a TITLE.lst file - it stores descriptions of files in the MMCS format and will be required later for the MMCS Music Server Editor (MSE) program for correct import of files.
 
 Max processes - MMCS MSConverter can convert several files at the same time, but system resources are wasted on this, so there is a limit to not strongly strain the computer. By default, 3.
