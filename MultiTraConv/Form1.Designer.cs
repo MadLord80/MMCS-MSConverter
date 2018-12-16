@@ -177,7 +177,7 @@
 			// conv_count
 			// 
 			this.conv_count.AutoSize = true;
-			this.conv_count.Location = new System.Drawing.Point(464, 96);
+			this.conv_count.Location = new System.Drawing.Point(449, 96);
 			this.conv_count.Name = "conv_count";
 			this.conv_count.Size = new System.Drawing.Size(13, 13);
 			this.conv_count.TabIndex = 11;
