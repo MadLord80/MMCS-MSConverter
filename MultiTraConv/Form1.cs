@@ -32,6 +32,8 @@ namespace MultiTraConv
 		private CancellationTokenSource ts = new CancellationTokenSource();
 		private CancellationToken ct;
 
+		Log logWindow = new Log();
+
 		private byte[] sc_header = new byte[80] {
 			0x52, 0x49, 0x46, 0x46, 0x00, 0x00, 0x00, 0x00, 0x57, 0x41, 0x56, 0x45,
 			0x66, 0x6D, 0x74, 0x20, 0x34, 0x00, 0x00, 0x00, 0xFE, 0xFF, 0x02, 0x00,
@@ -81,6 +83,14 @@ namespace MultiTraConv
 				? _start_table_height + new_table_height
 				: _start_table_height - new_table_height
 			);
+		}
+
+		private void addLog(string text)
+		{
+			if (logWindow.Visible)
+			{
+				logWindow.addLogText(text);
+			}
 		}
 
 		private void mp3dir_button_Click(object sender, EventArgs e)
@@ -171,6 +181,7 @@ namespace MultiTraConv
 				startInfo.UseShellExecute = false;
 				startInfo.RedirectStandardOutput = true;
 
+				logWindow.Show();
 				ConvertDirs(this.root_dir);
 				ConvertDone();
 			}
@@ -180,11 +191,15 @@ namespace MultiTraConv
 		{
 			while (dirtrackdone.Sum(dt => dt.Value) > 0)
 			{
+				addLog(String.Join(",", 
+					dirtrackdone.Where((dir) => dir.Value > 0).ToDictionary(k => k.Key, k => k.Value).Select((dir) => dir.Key + ":" + dir.Value).ToArray()
+				));
 				await Task.Delay(2000);
 			}
 			to_stop = false;
 			this.start_convert.Enabled = true;
 			this.stop_convert.Enabled = false;
+			Console.WriteLine(DateTime.Now.ToString("h:mm:ss"));
 			MessageBox.Show("DONE!");
 		}
 
@@ -201,6 +216,7 @@ namespace MultiTraConv
 				if (to_stop)
 				{
 					//Console.WriteLine("ConvertDirs: stop - return");
+					addLog("ConvertDirs: stop - return");
 					return;
 				}
 				ConvertDirs(subdir);
@@ -211,10 +227,12 @@ namespace MultiTraConv
 		{
 			int NNN_cnt = 0;
 			//Console.WriteLine("dir #" + dir.Name + "# converting...");
+			addLog("dir #" + dir.Name + "# converting...");
 			FileInfo[] dir_tracks = Get_input_tracks_from_dir(dir);
 			if (dir_tracks.Length == 0)
 			{
 				//Console.WriteLine("dir empty");
+				addLog("dir empty");
 				return;
 			}
 			DirectoryInfo sc_dir = new DirectoryInfo(oma_path.Text + dir.FullName.Remove(0, mp3_path.TextLength));
@@ -229,6 +247,7 @@ namespace MultiTraConv
 				}
 				NNN_cnt++;
 				//Console.WriteLine("ConvertDir: file - " + track.Name + " -> " + NNN_cnt);
+				addLog("ConvertDir: file - " + track.Name + " -> " + NNN_cnt);
 
 				while (dirtasks.Sum(dt => dt.Value) >= max_async)
 				{
@@ -238,6 +257,7 @@ namespace MultiTraConv
 				if (to_stop)
 				{
 					//Console.WriteLine("ConvertDir: stop - break");
+					addLog("ConvertDir: stop - break");
 					break;
 				}
 				if (add_path == null)
@@ -277,7 +297,9 @@ namespace MultiTraConv
 					while (dirtasks[add_path] > 0)
 					{
 						//Console.WriteLine("ConvertDir: stop - wait tracks");
+						addLog("ConvertDir: stop - wait tracks");
 						//Console.WriteLine("TASKS: " + dirtasks[add_path]);
+						addLog("TASKS: " + dirtasks[add_path]);
 						await Task.Delay(2000);
 					}
 					break;
@@ -286,6 +308,7 @@ namespace MultiTraConv
 				await Task.Delay(2000);
 			}
 			//Console.WriteLine("ConvertDir: dir " + dir.Name + " converted");
+			addLog("ConvertDir: dir " + dir.Name + " converted");
 			CreateTitle(sc_dir, titles);
 		}
 
@@ -372,6 +395,13 @@ namespace MultiTraConv
 		{
 			FileInfo[] sc_files = Get_output_tracks_from_dir(dir);
 			if (sc_files.Length == 0) { return; }
+			if (File.Exists(dir + "\\TITLE.lst"))
+			{
+				string add_path = sc_files[0].FullName.Remove(0, oma_path.TextLength);
+				add_path = add_path.Remove(add_path.Length - sc_files[0].Name.Length, sc_files[0].Name.Length);
+				dirtrackdone[add_path] = 0;
+				return;
+			}
 			FileStream title_file = new FileStream(dir.FullName + "\\TITLE.lst", FileMode.Create, FileAccess.Write);
 
 			// for 1-st block checksum
@@ -453,7 +483,8 @@ namespace MultiTraConv
 			}
 			title_file.Close();
 			change_header(sc_files);
-			//Console.WriteLine("TITLE.lst for " + dir.Name + " created");
+			addLog("TITLE.lst for " + dir.Name + " created");
+			//Console.WriteLine(DateTime.Now.ToString("h:mm:ss"));
 		}
 
 		private byte[] stringTo128bytes(string str)
@@ -500,6 +531,7 @@ namespace MultiTraConv
 		private void change_header(FileInfo[] sc_files)
 		{
 			//Console.WriteLine("change_header: dir " + sc_files[0].DirectoryName + " start");
+			addLog("change_header: dir " + sc_files[0].DirectoryName + " start");
 
 			string add_path = sc_files[0].FullName.Remove(0, oma_path.TextLength);
 			add_path = add_path.Remove(add_path.Length - sc_files[0].Name.Length, sc_files[0].Name.Length);
@@ -556,6 +588,8 @@ namespace MultiTraConv
 				string old_name = track.FullName;
 				File.Delete(track.FullName);
 				File.Move(out_file.Name, old_name);
+				//Console.WriteLine("change_header: file: " + old_name + " changed");
+				addLog("change_header: file: " + old_name + " changed");
 				SetPBStep();
 				dirtrackdone[add_path]--;
 			}
