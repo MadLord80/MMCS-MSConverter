@@ -32,7 +32,7 @@ namespace MultiTraConv
 		private CancellationTokenSource ts = new CancellationTokenSource();
 		private CancellationToken ct;
 
-		Log logWindow = new Log();
+		private Log logWindow;
 
 		private byte[] sc_header = new byte[80] {
 			0x52, 0x49, 0x46, 0x46, 0x00, 0x00, 0x00, 0x00, 0x57, 0x41, 0x56, 0x45,
@@ -101,6 +101,7 @@ namespace MultiTraConv
 			{
 				DirectoryInfo mp3_dir = new DirectoryInfo(this.mp3dir_dialog.SelectedPath);
 				this.root_dir = mp3_dir;
+				this.conv_count.Text = "0";
 				this.progressBar.Maximum = 0;
 				this.mp3_path.Text = this.mp3dir_dialog.SelectedPath;
 				this.FilesTable.Items.Clear();
@@ -183,6 +184,7 @@ namespace MultiTraConv
 				startInfo.UseShellExecute = false;
 				startInfo.RedirectStandardOutput = true;
 
+				logWindow = new Log();
 				logWindow.Show();
 				ConvertDirs(this.root_dir);
 				ConvertDone();
@@ -384,8 +386,10 @@ namespace MultiTraConv
 					SetLVIText(fullfilename, "converted");
 					//SetPBStep();
 				}
-				traconv.Dispose();
+				//addLog("ConvertFile: " + add_path + " has Exited");
+				Console.WriteLine("ConvertFile: " + add_path + " has Exited");
 				dirtasks[add_path]--;
+				traconv.Dispose();
 				tcs.SetResult(true);
 			};
 			traconv.Start();
@@ -595,6 +599,7 @@ namespace MultiTraConv
 				SetPBStep();
 				dirtrackdone[add_path]--;
 			}
+			dirtrackdone[add_path] = 0;
 		}
 
 		private void stop_convert_Click(object sender, EventArgs e)
