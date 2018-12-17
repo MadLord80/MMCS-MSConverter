@@ -55,6 +55,8 @@ namespace MultiTraConv
 		{
 			InitializeComponent();
 
+			this.Text = "MMCS Music Server Converter v." + Application.ProductVersion;
+
 			ct = ts.Token;
 
 			this.MaximumSize = new Size(986, 800);
