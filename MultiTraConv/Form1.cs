@@ -20,6 +20,7 @@ namespace MultiTraConv
 		private string traconv_path = Path.GetDirectoryName(Application.ExecutablePath) + "\\TraConv.exe";
 		private ProcessStartInfo startInfo;
 		private DirectoryInfo root_dir;
+        private bool toNNNsc = true;
 		private Dictionary<string, bool[]> converted_dirs = new Dictionary<string, bool[]>();
 		private Dictionary<string, int> dirtasks = new Dictionary<string, int>();
 		private Dictionary<string, int> dirtrackdone = new Dictionary<string, int>();
@@ -55,7 +56,8 @@ namespace MultiTraConv
 		{
 			InitializeComponent();
 
-			this.Text = "MMCS Music Server Converter v." + Application.ProductVersion;
+            string version = System.Windows.Forms.Application.ProductVersion;
+            this.Text = "MMCS Music Server Converter v." + version.Remove(version.Length - 2);
 
 			ct = ts.Token;
 
@@ -156,40 +158,47 @@ namespace MultiTraConv
 
 		private void button1_Click(object sender, EventArgs e)
 		{
-			if (this.FilesTable.Items.Count > 0 && this.oma_path.TextLength > 0)
-			{
-				foreach (ListViewItem row in this.FilesTable.Items) {
-					row.SubItems[1].Text = "ready";
-				}
-				this.progressBar.Value = 0;
-
-				this.start_convert.Enabled = false;
-				this.stop_convert.Enabled = true;
-
-				//if (debug)
-				//{
-				//	log = new FileStream(Path.GetDirectoryName(Application.ExecutablePath) + "\\" + log_file, FileMode.Create, FileAccess.Write);
-				//}
-
-				if (!File.Exists(traconv_path))
-				{
-					MessageBox.Show("Can`t find " + traconv_path + "!");
-					this.start_convert.Enabled = true;
-					this.stop_convert.Enabled = false;
-					return;
-				}
-
-				startInfo = new ProcessStartInfo(traconv_path);
-				startInfo.CreateNoWindow = true;
-				startInfo.UseShellExecute = false;
-				startInfo.RedirectStandardOutput = true;
-
-				logWindow = new Log();
-				logWindow.Show();
-				ConvertDirs(this.root_dir);
-				ConvertDone();
-			}
+            toNNNsc = true;
+            startConvert();
 		}
+
+        private void startConvert()
+        {
+            if (this.FilesTable.Items.Count > 0 && this.oma_path.TextLength > 0)
+            {
+                foreach (ListViewItem row in this.FilesTable.Items)
+                {
+                    row.SubItems[1].Text = "ready";
+                }
+                this.progressBar.Value = 0;
+
+                this.start_convert.Enabled = false;
+                this.stop_convert.Enabled = true;
+
+                //if (debug)
+                //{
+                //	log = new FileStream(Path.GetDirectoryName(Application.ExecutablePath) + "\\" + log_file, FileMode.Create, FileAccess.Write);
+                //}
+
+                if (!File.Exists(traconv_path))
+                {
+                    MessageBox.Show("Can`t find " + traconv_path + "!");
+                    this.start_convert.Enabled = true;
+                    this.stop_convert.Enabled = false;
+                    return;
+                }
+
+                startInfo = new ProcessStartInfo(traconv_path);
+                startInfo.CreateNoWindow = true;
+                startInfo.UseShellExecute = false;
+                startInfo.RedirectStandardOutput = true;
+
+                logWindow = new Log();
+                logWindow.Show();
+                ConvertDirs(this.root_dir);
+                ConvertDone();
+            }
+        }
 
 		private async void ConvertDone()
 		{
@@ -278,8 +287,9 @@ namespace MultiTraConv
 				}
 
 				string NNN = String.Format("{0,3:D3}", NNN_cnt);
-				titles.Add(NNN + ".sc", trackInfo(track));
-				ConvertFile(track, NNN);
+                string[] tInfo = trackInfo(track);
+                titles.Add(NNN + ".sc", tInfo);
+				ConvertFile(track, NNN, tInfo);
 				Application.DoEvents();
 			}
 
@@ -313,7 +323,7 @@ namespace MultiTraConv
 			}
 			//Console.WriteLine("ConvertDir: dir " + dir.Name + " converted");
 			addLog("ConvertDir: dir " + dir.Name + " converted");
-			CreateTitle(sc_dir, titles);
+            if (toNNNsc) { CreateTitle(sc_dir, titles); }
 		}
 
 		private void SetLVIText(string filename, string text)
@@ -343,7 +353,7 @@ namespace MultiTraConv
 			}
 		}
 
-		private Task ConvertFile(FileInfo track, string NNN_name)
+		private Task ConvertFile(FileInfo track, string NNN_name, string[] tInfo)
 		{
 			var tcs = new TaskCompletionSource<bool>();
 
@@ -356,9 +366,14 @@ namespace MultiTraConv
 
 			string add_path = fullfilename.Remove(0, mp3_path.TextLength);
 			add_path = add_path.Remove(add_path.Length - filename.Length, filename.Length);
-			//Console.WriteLine("ConvertFile: add_path #" + add_path + "#");
-			string new_path_sc = oma_path.Text + add_path + NNN_name + ".sc";
-			if (File.Exists(new_path_sc))
+            //Console.WriteLine("ConvertFile: add_path #" + add_path + "#");
+
+            //string new_path_sc = oma_path.Text + add_path + NNN_name + ".sc";
+            string new_path_sc = oma_path.Text + add_path + NNN_name;
+            if (! toNNNsc) { new_path_sc += "." + tInfo[1] + " == " + tInfo[0]; }
+            new_path_sc += ".sc";
+
+            if (File.Exists(new_path_sc))
 			{
 				SetLVIText(fullfilename, "converted");
 				//SetPBStep();
@@ -626,5 +641,11 @@ namespace MultiTraConv
 		{
 			max_async = Decimal.ToInt32(this.user_max_async.Value);
 		}
-	}
+
+        private void button1_Click_1(object sender, EventArgs e)
+        {
+            toNNNsc = false;
+            startConvert();
+        }
+    }
 }
