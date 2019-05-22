@@ -11,7 +11,7 @@
 Для работы консольной утилиты TraConv.exe необходимо установить пакет Sony OpenMG (Sony Media Library Earth - 
 https://github.com/MadLord80/MMCS-MSConverter/blob/master/OpenMG.rar).
 
-Скачать - 
+Скачать - https://github.com/MadLord80/MMCS-MSConverter/releases
 
 MadLord, 2018 (madlord.info)
 
