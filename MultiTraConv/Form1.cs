@@ -323,7 +323,14 @@ namespace MultiTraConv
 			}
 			//Console.WriteLine("ConvertDir: dir " + dir.Name + " converted");
 			addLog("ConvertDir: dir " + dir.Name + " converted");
-            if (toNNNsc) { CreateTitle(sc_dir, titles); }
+            if (toNNNsc)
+            {
+                CreateTitle(sc_dir, titles);
+            }
+            else
+            {
+                dirtrackdone[add_path] = 0;
+            }
 		}
 
 		private void SetLVIText(string filename, string text)
@@ -399,7 +406,11 @@ namespace MultiTraConv
 				else
 				{
 					SetLVIText(fullfilename, "converted");
-					//SetPBStep();
+					if (! toNNNsc)
+                    {
+                        SetPBStep();
+                        dirtrackdone[add_path]--;
+                    }
 				}
 				//addLog("ConvertFile: " + add_path + " has Exited");
 				Console.WriteLine("ConvertFile: " + add_path + " has Exited");
