@@ -12,7 +12,7 @@ To convert files to the standard ATRAC3Plus format, the program uses the TraConv
 To use the TraConv.exe console utility, you need to install the Sony OpenMG package (Sony Media Library Earth - 
 https://github.com/MadLord80/MMCS-MSConverter/blob/master/OpenMG.rar).
 
-Download - 
+Download - https://github.com/MadLord80/MMCS-MSConverter/releases
 
 MadLord, 2018 (madlord.info)
 
