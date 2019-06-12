@@ -321,19 +321,12 @@ namespace MultiTraConv
 				//Console.WriteLine("TASKS: " + dirtasks[add_path]);
 				await Task.Delay(2000);
 			}
-			//Console.WriteLine("ConvertDir: dir " + dir.Name + " converted");
-			addLog("ConvertDir: dir " + dir.Name + " converted");
-            if (toNNNsc)
-            {
-                CreateTitle(sc_dir, titles);
-            }
-            else
-            {
-                dirtrackdone[add_path] = 0;
-            }
-		}
+            //Console.WriteLine("ConvertDir: dir " + dir.Name + " converted");
+            addLog("ConvertDir: dir " + dir.Name + " converted");
+            CreateTitle(sc_dir, titles);
+        }
 
-		private void SetLVIText(string filename, string text)
+        private void SetLVIText(string filename, string text)
 		{
 			if (this.FilesTable.InvokeRequired)
 			{
@@ -406,11 +399,6 @@ namespace MultiTraConv
 				else
 				{
 					SetLVIText(fullfilename, "converted");
-					if (! toNNNsc)
-                    {
-                        SetPBStep();
-                        dirtrackdone[add_path]--;
-                    }
 				}
 				//addLog("ConvertFile: " + add_path + " has Exited");
 				Console.WriteLine("ConvertFile: " + add_path + " has Exited");
@@ -427,6 +415,13 @@ namespace MultiTraConv
 		{
 			FileInfo[] sc_files = Get_output_tracks_from_dir(dir);
 			if (sc_files.Length == 0) { return; }
+
+            if (! toNNNsc)
+            {
+                change_header(sc_files);
+                return;
+            }
+
 			if (File.Exists(dir + "\\TITLE.lst"))
 			{
 				string add_path = sc_files[0].FullName.Remove(0, oma_path.TextLength);
